@@ -98,6 +98,8 @@ func main() {
 	routes.SetUsuarioRoutes(server, controllers.NewUsuarioController(usecases.NewUsuarioUseCases(repository.NewUsuarioRepository(dbConnection))))
 	routes.SetupLeadRoutes(server, controllers.NewLeadController(usecases.NewLeadUseCases(repository.NewLeadRepository(dbConnection))))
 
+	routes.SetupClienteRoutes(server, controllers.NewClienteController(usecases.NewClienteUseCase(repository.NewClienteRepo(dbConnection))))
+
 	portBack := os.Getenv("PORT")
 	fmt.Println("Servidor rodando na porta: ", portBack)
 	server.Run(":" + portBack)

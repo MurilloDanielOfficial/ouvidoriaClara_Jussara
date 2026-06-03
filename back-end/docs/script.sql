@@ -35,8 +35,8 @@ CREATE TABLE cliente (
     endereco TEXT,
     bairro TEXT,
     data_nascimento TEXT,
-    data_criacao DATE DEFAULT CURRENT_DATE NOT NULL
-)
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
 
 CREATE TABLE conversas (
     telefone TEXT(64) NOT NULL,
