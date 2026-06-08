@@ -86,7 +86,8 @@ CREATE TABLE reclamacao (
     data_criacao TIMESTAMP DEFAULT now() NOT NULL,
     tipo TEXT DEFAULT '' NOT NULL,
     status TEXT DEFAULT 'Em análise' NOT NULL,
-    detalhes JSONB DEFAULT '{}' NOT NULL
+    detalhes JSONB DEFAULT '{}' NOT NULL,
+    solicitacao JSONB DEFAULT '{}' NOT NULL
 );
 
 CREATE TABLE protocolo (
