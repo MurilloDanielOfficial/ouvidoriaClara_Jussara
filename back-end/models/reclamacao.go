@@ -18,19 +18,75 @@ type Inquerito struct {
 }
 
 type Reclamacao struct {
-	ID          int    `json:"id"`
-	Nome        string `json:"nome"`
-	Telefone    string `json:"telefone"`
-	Categoria   string `json:"categoria"`
-	Regiao      int    `json:"regiao"`
-	Reclamacao  string `json:"reclamacao"`
-	Resolvido   bool   `json:"resolvido"`
-	DataCriacao string `json:"dataCriacao"`
-	Tipo        string `json:"tipo"`
-	Status      string `json:"status"`
-	Protocolo   *int   `json:"num_protocolo"`
+	ID          int                `json:"id"`
+	Nome        string             `json:"nome"`
+	Telefone    string             `json:"telefone"`
+	Categoria   string             `json:"categoria"`
+	Regiao      int                `json:"regiao"`
+	Reclamacao  string             `json:"reclamacao"` //igual situação resumida
+	Resolvido   bool               `json:"resolvido"`
+	DataCriacao string             `json:"dataCriacao"`
+	Tipo        string             `json:"tipo"` //inquerito ou requerimento
+	Status      string             `json:"status"`
+	Protocolo   *int               `json:"num_protocolo"`
+	Detalhes    DetalhesReclamacao `json:"detalhe"`
+}
+
+type OcorrenciaRequest struct {
+	Telefone         string `json:"telefone"`
+	SituacaoResumida string `json:"situacaoResumida"`
+	Categoria        string `json:"categoria"`
+	DetalhesReclamacao
+}
+
+type OcorrenciaData struct {
+	Telefone string `json:"telefone"`
+	Categoria string `json:"categoria"`
+	Reclamacao string `json:"reclamacao"`
+	Detalhes DetalhesReclamacao `json:"detalhes"`
 }
 
 type Atualizacao struct {
 	NovaReclamacao string `json:"novaReclamacao" binding:"required"`
+}
+
+// DetalhesReclamacao armazena os campos extras coletados pela IA (prompt_v2.xml)
+// no JSONB "detalhes" da tabela reclamacao. Cada fluxo preenche apenas o subconjunto relevante.
+type DetalhesReclamacao struct {
+	// Maus-tratos
+	EnderecoOcorrencia   string `json:"enderecoOcorrencia,omitempty"`
+	ConheceTutor         string `json:"conheceTutor,omitempty"`
+	CondicoesAnimal      string `json:"condicoesAnimal,omitempty"`
+	FrequenciaMausTratos string `json:"frequenciaMausTratos,omitempty"`
+
+	// Dados do animal (abandono, comunitário, desaparecido, adoção, castração, silvestres)
+	NomeAnimal                string `json:"nomeAnimal,omitempty"`
+	EspecieAnimal             string `json:"especieAnimal,omitempty"`
+	IdadeAnimal               string `json:"idadeAnimal,omitempty"`
+	SexoAnimal                string `json:"sexoAnimal,omitempty"`
+	BairroAnimal              string `json:"bairroAnimal,omitempty"`
+	NomeResponsavelAnimal     string `json:"nomeResponsavelAnimal,omitempty"`
+	TelefoneResponsavelAnimal string `json:"telefoneResponsavelAnimal,omitempty"`
+	HistoricoAnimal           string `json:"historicoAnimal,omitempty"`
+
+	// Saúde animal
+	TemCadUnico            string `json:"temCadUnico,omitempty"`
+	EhProtetorIndependente string `json:"ehProtetorIndependente,omitempty"`
+	SituacaoAnimal         string `json:"situacaoAnimal,omitempty"`
+
+	// Castração emergencial
+	QuandoCruzou    string `json:"quandoCruzou,omitempty"`
+	InfoSaudeAnimal string `json:"infoSaudeAnimal,omitempty"`
+
+	// Animais não domiciliados
+	DetalhesDenuncia string `json:"detalhesDenuncia,omitempty"`
+
+	// Animais silvestres
+	TempoAnimalLocal   string `json:"tempoAnimalLocal,omitempty"`
+	FerimentosAnimal   string `json:"ferimentosAnimal,omitempty"`
+	ProvidenciasAnimal string `json:"providenciasAnimal,omitempty"`
+
+	// Comum a fluxos com mídia e/ou protocolo de denúncia
+	MidiasAnimal      string `json:"midiasAnimal,omitempty"`
+	ProtocoloDenuncia string `json:"protocoloDenuncia,omitempty"`
 }

@@ -230,6 +230,7 @@
             Execute a tool:
             {
                 "idAcao":"registrar_ocorrencia_demanda_geral",
+                "categoria":"geral",
                 "telefoneCliente":"{{telefoneCliente}}",
                 "situacaoResumida":"{{situacaoResumida}}"
             }
@@ -246,9 +247,9 @@
                 </Identificacao>
                 Solicite:
                 - endereco da ocorrencia → {{enderecoOcorrencia}}
-                - se conhece o tutor do animal → {{conheceTutor}}
-                - condições do animal → {{condicoesAnimal}}
-                - frequencia dos maus-tratos → {{frequenciaMausTratos}}
+                - se conhece o tutor do animal (SIM/NÃO) → {{conheceTutor}}
+                - condições do animal (se não souber coloque "N/A") → {{condicoesAnimal}}
+                - frequencia dos maus-tratos (se não souber coloque "N/A") → {{frequenciaMausTratos}}
 
                 <Solicitar_Midia>
                     Solicite fotos ou vídeos que comprovem os maus-tratos.
@@ -276,6 +277,7 @@
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia_maus_tratos",
+                    "categoria":"maus tratos",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "conheceTutor":"{{conheceTutor}}",
@@ -325,6 +327,7 @@
                     Execute a tool:
                     {
                         "idAcao":"registrar_abandono_presenciado",
+                        "categoria":"abandono presenciado",
                         "telefoneCliente":"{{telefoneCliente}}",
                         "midiasAnimal":"{{midiasAnimal}}",
                         "protocoloDenuncia":"{{protocoloDenuncia}}",
@@ -371,6 +374,7 @@
                     Execute a tool:
                     {
                         "idAcao":"registrar_animal_apareceu_na_rua",
+                        "categoria":"animal apareceu na rua",
                         "telefoneCliente":"{{telefoneCliente}}",
                         "especieAnimal":"{{especieAnimal}}",
                         "idadeAnimal":"{{idadeAnimal}}",
@@ -420,6 +424,7 @@
                 Execute a tool:
                 {
                     "idAcao":"registrar_ajuda_animal_comunitario",
+                    "categoria":"ajuda animal comunitario",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "especieAnimal":"{{especieAnimal}}",
                     "idadeAnimal":"{{idadeAnimal}}",
@@ -461,6 +466,7 @@
                 Execute a tool:
                 {
                     "idAcao":"registrar_demanda_saude_animal",
+                    "categoria":"saude animal",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "temCadUnico":"{{temCadUnico}}",
                     "ehProtetorIndependente":"{{ehProtetorIndependente}}",
@@ -488,6 +494,7 @@
                     Execute a tool:
                     {
                         "idAcao":"registrar_demanda_castracao_eletiva",
+                        "categoria":"castracao eletiva",
                         "telefoneCliente":"{{telefoneCliente}}",
                         "situacaoResumida":"{{situacaoResumida}}"
                     }
@@ -508,6 +515,7 @@
                     Execute a tool:
                     {
                         "idAcao":"registrar_demanda_castracao_emergencial",
+                        "categoria":"castracao emergencial",
                         "telefoneCliente":"{{telefoneCliente}}",
                         "idadeAnimal":"{{idadeAnimal}}",
                         "quandoCruzou":"{{quandoCruzou}}",
@@ -542,6 +550,7 @@
                 Execute a tool:
                 {
                     "idAcao":"registrar_ajuda_animais_nao_domiciliados",
+                    "categoria":"animais nao domiciliados",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "detalhesDenuncia":"{{detalhesDenuncia}}",
                     "protocoloDenuncia":"{{protocoloDenuncia}}",
@@ -575,6 +584,7 @@
                 Execute a tool:
                 {
                     "idAcao":"registrar_pet_desaparecido",
+                    "categoria":"animal desaparecido",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "nomeAnimal":"{{nomeAnimal}}",
                     "especieAnimal":"{{especieAnimal}}",
@@ -619,7 +629,8 @@
 
                 Execute a tool:
                 {
-                    "idAcao":"registrar_pet_desaparecido",
+                    "idAcao":"registrar_animal_para_ser_adotado",
+                    "categoria":"animal para ser adotado",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "nomeAnimal":"{{nomeAnimal}}",
                     "especieAnimal":"{{especieAnimal}}",
@@ -651,6 +662,7 @@
 
                 Execute a tool:{
                     "idAcao":"registrar_adocao_animais",
+                    "categoria":"adocao de animais",
                     "telefoneCliente":"{{telefoneCliente}}"
                 }
             </Adocao_De_Animais>
@@ -671,6 +683,7 @@
 
                 Execute a tool:{
                     "idAcao":"registrar_animal_grande_porte",
+                    "categoria":"animal grande porte",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -691,6 +704,7 @@
 
                 Execute a tool:{
                     "idAcao":"registrar_animal_atropelado",
+                    "categoria":"animal atropelado",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -709,6 +723,7 @@
 
                 Execute a tool:{
                     "idAcao":"registrar_cuidados_animais",
+                    "categoria":"cuidados animais",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -745,7 +760,8 @@
 
                 Execute a tool:
                 {
-                    "idAcao":"registrar_cuidados_animais",
+                    "idAcao":"registrar_animais_silvestres",
+                    "categoria":"animais silvestres",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "especieAnimal":"{{especieAnimal}}",
                     "tempoAnimalLocal":"{{tempoAnimalLocal}}",
@@ -766,7 +782,8 @@
 
                 Execute a tool:
                 {
-                    "idAcao":"registrar_cuidados_animais",
+                    "idAcao":"registrar_equipamentos",
+                    "categoria":"equipamentos",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }

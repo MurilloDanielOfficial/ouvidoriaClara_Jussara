@@ -80,13 +80,12 @@ CREATE TABLE reclamacao (
     idreclamacao SERIAL PRIMARY KEY,
     telefone TEXT NOT NULL,
     categoria TEXT DEFAULT '' NOT NULL,
-    endereco TEXT DEFAULT '' NOT NULL,
-    bairro TEXT DEFAULT '' NOT NULL,
     reclamacao TEXT DEFAULT '' NOT NULL,
-    data_criacao TIMESTAMP DEFAULT now() NOT NULL,
     tipo TEXT DEFAULT '' NOT NULL,
     status TEXT DEFAULT 'Em análise' NOT NULL,
-    detalhes JSONB DEFAULT '{}' NOT NULL
+    detalhes JSONB DEFAULT '{}' NOT NULL,
+    data_criacao TIMESTAMP DEFAULT now() NOT NULL,
+    data_atualizacao TIMESTAMP DEFAULT now() NOT NULL
 );
 
 CREATE TABLE protocolo (

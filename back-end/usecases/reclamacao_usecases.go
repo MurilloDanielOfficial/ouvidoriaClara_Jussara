@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var categorias = []string{"saúde", "educação", "transporte", "asfalto", "governança"}
+var categorias = []string{"geral", "maus tratos", "abandono presenciado", "animal apareceu na rua", "ajuda animal comunitario", "saude animal", "castracao eletiva", "castracao emergencial", "animais nao domiciliados", "animal desaparecido", "animal para ser adotado", "adocao de animais", "animal grande porte", "animal atropelado", "cuidados animais", "animais silvestres", "equipamentos"}
 
 type ReclamacaoUseCases struct {
 	repository repository.ReclamacaoRepository
@@ -150,4 +150,20 @@ func (uc ReclamacaoUseCases) AprovarComoAmbos(id string) error {
 
 func (uc ReclamacaoUseCases) ReprovarInquerito(id string) error {
 	return uc.repository.UpdateStatus(id, "reprovado")
+}
+
+func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) error {
+	if !ehCategoria(request.Categoria) {
+		return fmt.Errorf("Categoria inválida")
+	}
+	request.Telefone = normalizeTelefone(request.Telefone)
+
+	data := models.OcorrenciaData{
+		Telefone: request.Telefone,
+		Categoria: request.Categoria,
+		Reclamacao: request.SituacaoResumida,
+		Detalhes: request.DetalhesReclamacao,
+	}
+
+	return uc.repository.CreateOcorrencia(data)
 }

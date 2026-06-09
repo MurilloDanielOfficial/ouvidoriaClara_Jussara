@@ -3,6 +3,7 @@ package repository
 import (
 	"back-end/models"
 	"database/sql"
+	"encoding/json"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -80,4 +81,13 @@ func (repo ReclamacaoRepository) GetAllReclamacoes() ([]models.Reclamacao, error
 		reclamacoes = append(reclamacoes, reclamacao)
 	}
 	return reclamacoes, nil
+}
+
+func (repo ReclamacaoRepository) CreateOcorrencia(data models.OcorrenciaData) error {
+	detalhesJSON, _ := json.Marshal(data.Detalhes)
+	const query = `
+        INSERT INTO reclamacao (telefone, categoria, reclamacao, detalhes)
+        VALUES ($1, $2, $3, $4::jsonb)`
+	_, err := repo.connection.Exec(query, data.Telefone, data.Categoria, data.Reclamacao, detalhesJSON)
+	return err
 }
