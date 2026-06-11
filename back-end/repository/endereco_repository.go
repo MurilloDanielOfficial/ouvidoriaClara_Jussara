@@ -29,6 +29,18 @@ func (repo EnderecoRepository) GetRegiaoByLogradouro(logradouro, bairro string) 
 	err := repo.connection.Get(&regiao, query, logradouro, bairro)
 	return regiao, err
 }
+func (repo EnderecoRepository) GetRegiaoByBairro(bairro string) (string, error) {
+	const query = `
+		SELECT regiao FROM enderecos
+		WHERE bairro ILIKE '%' || $1 || '%'
+		ORDER BY
+			CASE WHEN LOWER(TRIM(bairro)) = LOWER(TRIM($1)) THEN 0 ELSE 1 END,
+			LENGTH(bairro) ASC
+		LIMIT 1`
+	var regiao string
+	err := repo.connection.Get(&regiao, query, bairro)
+	return regiao, err
+}
 
 func (repo EnderecoRepository) FindCandidatosPorPalavras(palavras []string, bairro string, limit int) ([]models.Logradouro, error) {
 	if len(palavras) == 0 {

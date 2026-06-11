@@ -204,6 +204,18 @@ func (uc EnderecoUseCases) GetRegiao(input string) string {
 	return "Centro"
 }
 
+func (uc EnderecoUseCases) GetRegiaoPorBairro(bairro string) string {
+	bairro = strings.ToLower(strings.TrimSpace(bairro))
+	if bairro == "" {
+		return "Centro"
+	}
+	regiao, err := uc.repository.GetRegiaoByBairro(bairro)
+	if err == nil {
+		return regiao
+	}
+	return "Centro"
+}
+
 func (uc EnderecoUseCases) CadastrarEnderecos(enderecos []models.Endereco) error {
 	for _, endereco := range enderecos {
 		if err := uc.repository.CreateEndereco(endereco); err != nil {

@@ -43,6 +43,7 @@ type OcorrenciaData struct {
 	Telefone   string             `json:"telefone"`
 	Categoria  string             `json:"categoria"`
 	Reclamacao string             `json:"reclamacao"`
+	Regiao     string             `json:"regiao"`
 	Detalhes   DetalhesReclamacao `json:"detalhes"`
 }
 
@@ -108,4 +109,6 @@ type DetalhesReclamacao struct {
 	// Comum a fluxos com mídia e/ou protocolo de denúncia
 	MidiasAnimal      string `json:"midiasAnimal,omitempty"`
 	ProtocoloDenuncia string `json:"protocoloDenuncia,omitempty"`
+
+	Regiao string `json:"regiao,omitempty"`
 }

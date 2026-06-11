@@ -16,10 +16,11 @@ var categorias = []string{"geral", "maus tratos", "abandono presenciado", "anima
 
 type ReclamacaoUseCases struct {
 	repository repository.ReclamacaoRepository
+	enderecoUC EnderecoUseCases
 }
 
-func NewReclamacaoUseCases(repo repository.ReclamacaoRepository) ReclamacaoUseCases {
-	return ReclamacaoUseCases{repository: repo}
+func NewReclamacaoUseCases(repo repository.ReclamacaoRepository, enderecoUC EnderecoUseCases) ReclamacaoUseCases {
+	return ReclamacaoUseCases{repository: repo, enderecoUC: enderecoUC}
 }
 
 func ehCategoria(str string) bool {
@@ -155,6 +156,8 @@ func (uc ReclamacaoUseCases) ReprovarInquerito(id string) error {
 	return uc.repository.UpdateStatus(id, "reprovado")
 }
 
+//new
+
 func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) (int, error) {
 	if request.Telefone == "" {
 		return 0, apperror.BadRequest("Telefone obrigatório")
@@ -172,7 +175,14 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 		Reclamacao: request.SituacaoResumida,
 		Detalhes:   request.DetalhesReclamacao,
 	}
-
+	regiao := ""
+	switch data.Categoria {
+	case "maus tratos":
+		regiao = uc.enderecoUC.GetRegiao(request.EnderecoOcorrencia)
+	case "animal apareceu na rua", "ajuda animal comunitario", "animal desaparecido", "animal para ser adotado":
+		regiao = uc.enderecoUC.GetRegiaoPorBairro(request.BairroAnimal)
+	}
+	data.Detalhes.Regiao = regiao
 	id, err := uc.repository.CreateOcorrencia(data)
 	if err != nil {
 		return 0, apperror.Internal(err.Error())

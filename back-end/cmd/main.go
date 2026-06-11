@@ -94,8 +94,9 @@ func main() {
 	go config.CheckInativos10Min(dbConnection)
 	go config.CheckInativos1Day(dbConnection)
 
-	routes.SetupReclamacaoRoutes(server, controllers.NewReclamacaoController(usecases.NewReclamacaoUseCases(repository.NewReclamacaoRepository(dbConnection))))
-	routes.SetupEnderecoRoutes(server, controllers.NewEnderecoController(usecases.NewEnderecoUseCases(repository.NewEnderecoRepository(dbConnection))))
+	enderecoUC := usecases.NewEnderecoUseCases(repository.NewEnderecoRepository(dbConnection))
+	routes.SetupReclamacaoRoutes(server, controllers.NewReclamacaoController(usecases.NewReclamacaoUseCases(repository.NewReclamacaoRepository(dbConnection), enderecoUC)))
+	routes.SetupEnderecoRoutes(server, controllers.NewEnderecoController(enderecoUC))
 	routes.SetupProtocoloRoutes(server, controllers.NewProtocoloController(usecases.NewProtocoloUseCases(repository.NewProtocoloRepository(dbConnection))))
 	routes.SetupStatsRoutes(server, controllers.NewStatsController(usecases.NewStatsUseCases(repository.NewStatsRepository(dbConnection))))
 
