@@ -100,19 +100,19 @@ func (uc ReclamacaoUseCases) AprovarRequerimento(id string) error {
 	return nil
 }
 
-func (uc ReclamacaoUseCases) AprovarOficio(id string) error {
-	if err := uc.repository.UpdateStatusTipo(id, "aprovado", "ofício"); err != nil {
-		return err
-	}
-	data, err := uc.repository.GetReclamacaoById(id)
-	if err != nil {
-		return err
-	}
-	if _, err := services.EnviaOficio(*data); err != nil {
-		return err
-	}
-	return nil
-}
+// func (uc ReclamacaoUseCases) AprovarOficio(id string) error {
+// 	if err := uc.repository.UpdateStatusTipo(id, "aprovado", "ofício"); err != nil {
+// 		return err
+// 	}
+// 	data, err := uc.repository.GetReclamacaoById(id)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if _, err := services.EnviaOficio(*data); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (uc ReclamacaoUseCases) AprovarComoAmbos(id string) error {
 	if err := uc.repository.UpdateStatus(id, "aprovado"); err != nil {

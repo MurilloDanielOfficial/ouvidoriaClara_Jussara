@@ -48,109 +48,181 @@ func novoCabecalho(titulo string) *gofpdf.Fpdf {
 
 func dataExtenso() string {
 	now := time.Now()
-	return fmt.Sprintf("Sorocaba, %d de %s de %d", now.Day(), meses[now.Month()-1], now.Year())
+	return fmt.Sprintf("S/S., %d de %s de %d", now.Day(), meses[now.Month()-1], now.Year())
+}
+
+func assinarPDF(pdf *gofpdf.Fpdf, tr func(string) string) {
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(0, 10, tr("JUSSARA FERNANDES"), "", 1, "C", false, 0, "")
+	pdf.SetFont("Arial", "", 11)
+	pdf.CellFormat(0, 10, tr("Vereadora"), "", 1, "C", false, 0, "")
+}
+
+func parseIndicacao(text string) (necessidade, considerando1, considerando2, providencias string) {
+	parts := strings.Split(text, "$$")
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
+	}
+	switch len(parts) {
+	case 1:
+		necessidade = parts[0]
+		providencias = parts[0]
+	case 2:
+		necessidade = parts[0]
+		providencias = parts[1]
+	case 3:
+		necessidade = parts[0]
+		considerando1 = parts[1]
+		providencias = parts[2]
+	default:
+		necessidade = parts[0]
+		considerando1 = parts[1]
+		considerando2 = parts[2]
+		providencias = parts[3]
+	}
+	return
+}
+
+func parseRequerimento(text string) (requer, considerando1, considerando2 string, questoes []string) {
+	if !strings.Contains(text, "$$") {
+		text = "$$" + text
+	}
+	parts := strings.Split(text, "$$")
+	if parts[0] == "" {
+		parts = parts[1:]
+	}
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
+	}
+	switch len(parts) {
+	case 1:
+		questoes = strings.Split(parts[0], "|")
+	case 2:
+		requer = parts[0]
+		questoes = strings.Split(parts[1], "|")
+	case 3:
+		requer = parts[0]
+		considerando1 = parts[1]
+		questoes = strings.Split(parts[2], "|")
+	default:
+		requer = parts[0]
+		considerando1 = parts[1]
+		considerando2 = parts[2]
+		questoes = strings.Split(parts[3], "|")
+	}
+	return
 }
 
 func GeneratePDF(requestData models.Inquerito) error {
+	necessidade, considerando1, considerando2, providencias := parseIndicacao(requestData.Reclamacao)
+
 	pdf := novoCabecalho("INDICAÇÃO N.º ___ / " + time.Now().Format("2006"))
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 
 	pdf.SetFont("Arial", "", 11)
-	pdf.Cell(0, 10, tr("Excelentíssima Vereadora Jussara Fernandes,"))
-	pdf.Ln(15)
+	pdf.MultiCell(0, 10, tr("Indica ao Executivo Municipal a necessidade de "+necessidade+"."), "", "", false)
+	pdf.Ln(10)
 
-	pdf.SetFont("Arial", "", 11)
-	pdf.Write(10, tr("Esta Vereadora, submentendo este documento ao Chefe do Poder Executivo, diretamente ou através de departamento ou divisão competente,"))
-	pdf.SetFont("Arial", "B", 11)
-	pdf.Write(10, tr(" INDICA"))
-	pdf.SetFont("Arial", "", 11)
-	pdf.Write(10, tr(" ao Senhor Prefeito Municipal, que "))
-	pdf.Write(10, tr(requestData.Reclamacao+"."))
-	pdf.Ln(15)
+	if considerando1 != "" {
+		pdf.MultiCell(0, 10, tr("CONSIDERANDO que "+considerando1+"."), "", "", false)
+		pdf.Ln(10)
+	}
+	if considerando2 != "" {
+		pdf.MultiCell(0, 10, tr("CONSIDERANDO "+considerando2+"."), "", "", false)
+		pdf.Ln(10)
+	}
 
-	pdf.SetFont("Arial", "", 11)
-	pdf.Cell(0, 10, tr("Nestes termos,"))
-	pdf.Ln(5)
-	pdf.Cell(0, 10, tr("Aguarda deferimento."))
-	pdf.Ln(30)
+	pdf.SetX(40)
+	pdf.MultiCell(0, 10, tr("INDICO ao Exmo. Sr. Prefeito Municipal, através do setor competente, a tomada de providências visando à / ao "+providencias+"."), "", "", false)
+	pdf.Ln(20)
 
+	pdf.SetX(20)
 	pdf.Cell(0, 10, tr(dataExtenso()))
 	pdf.Ln(20)
 
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 10, tr("VEREADORA JUSSARA FERNANDES"), "", 1, "C", false, 0, "")
+	assinarPDF(pdf, tr)
 
 	return pdf.OutputFileAndClose("indicacao.pdf")
 }
 
 func GenerateRequerimento(requestData models.Inquerito) error {
-	if !strings.Contains(requestData.Reclamacao, "$$") {
-		requestData.Reclamacao = "$$" + requestData.Reclamacao
-	}
-	args := strings.Split(requestData.Reclamacao, "$$")
+	requer, considerando1, considerando2, questoes := parseRequerimento(requestData.Reclamacao)
 
 	pdf := novoCabecalho("REQUERIMENTO N.º ___ / " + time.Now().Format("2006"))
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 
 	pdf.SetFont("Arial", "", 11)
-	pdf.Cell(0, 10, tr("Senhor Presidente,"))
-	pdf.Ln(15)
-	pdf.Cell(0, 10, tr("Senhores Vereadores,"))
-	pdf.Ln(15)
-
-	pdf.SetFont("Arial", "", 11)
-	pdf.Write(10, tr("Esta Vereadora, submentendo este documento ao Chefe do Poder Executivo, diretamente ou através de departamento ou divisão competente,"))
-	pdf.SetFont("Arial", "B", 11)
-	pdf.Write(10, tr(" REQUER"))
-	pdf.SetFont("Arial", "", 11)
-	pdf.Write(10, tr(" que, seja oficiado ao Prefeito Municipal para que nos sejam prestadas as seguintes informações:"))
-	pdf.Ln(15)
-
-	requests := strings.Split(args[1], "|")
-	for i, request := range requests {
-		pdf.SetFont("Arial", "", 11)
-		pdf.Write(10, tr(fmt.Sprintf("%d. %s", i+1, request)))
-		pdf.Ln(15)
+	if requer != "" {
+		pdf.MultiCell(0, 10, tr("REQUER "+requer+"."), "", "", false)
+		pdf.Ln(10)
 	}
+
+	if considerando1 != "" {
+		pdf.MultiCell(0, 10, tr("CONSIDERANDO "+considerando1+"."), "", "", false)
+		pdf.Ln(10)
+	}
+	if considerando2 != "" {
+		pdf.MultiCell(0, 10, tr("CONSIDERANDO "+considerando2+"."), "", "", false)
+		pdf.Ln(10)
+	}
+
+	pdf.MultiCell(0, 10, tr("REQUEIRO à Mesa, ouvido o Plenário, seja oficiado ao Excelentíssimo Senhor Prefeito Municipal, solicitando nos informar o que segue:"), "", "", false)
+	pdf.Ln(10)
+
+	pdf.SetFont("Arial", "I", 11)
+	pdf.Cell(0, 10, tr("(Solicitações - Questionamentos)"))
+	pdf.Ln(10)
+
+	pdf.SetFont("Arial", "", 11)
+	for i, q := range questoes {
+		q = strings.TrimSpace(q)
+		if q == "" {
+			continue
+		}
+		pdf.SetX(40)
+		pdf.MultiCell(0, 10, tr(fmt.Sprintf("%d) %s", i+1, q)), "", "", false)
+		pdf.Ln(5)
+	}
+	pdf.SetX(20)
+	pdf.Ln(15)
 
 	pdf.Cell(0, 10, tr(dataExtenso()))
 	pdf.Ln(20)
 
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 10, tr("VEREADORA JUSSARA FERNANDES"), "", 1, "C", false, 0, "")
+	assinarPDF(pdf, tr)
 
 	return pdf.OutputFileAndClose("requerimento.pdf")
 }
 
-func GenerateOficio(requestData models.Inquerito) error {
-	now := time.Now()
-	pdf := novoCabecalho("OFÍCIO N.º ___ / " + now.Format("2006"))
-	tr := pdf.UnicodeTranslatorFromDescriptor("")
+// func GenerateOficio(requestData models.Inquerito) error {
+// 	now := time.Now()
+// 	pdf := novoCabecalho("OFÍCIO N.º ___ / " + now.Format("2006"))
+// 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 
-	pdf.SetFont("Arial", "", 11)
-	pdf.Cell(0, 10, tr("Senhor Presidente,"))
-	pdf.Ln(15)
+// 	pdf.SetFont("Arial", "", 11)
+// 	pdf.Cell(0, 10, tr("Senhor Presidente,"))
+// 	pdf.Ln(15)
 
-	pdf.SetFont("Arial", "", 11)
-	pdf.Write(10, tr("Esta Vereadora, submentendo este documento ao Chefe do Poder Executivo, diretamente ou através de departamento ou divisão competente,"))
-	pdf.SetFont("Arial", "B", 11)
-	pdf.Write(10, tr(" OFICIA"))
-	pdf.SetFont("Arial", "", 11)
-	pdf.Write(10, tr(" ao Senhor Prefeito Municipal, que "))
-	pdf.Write(10, tr(requestData.Reclamacao+"."))
-	pdf.Ln(15)
+// 	pdf.SetFont("Arial", "", 11)
+// 	pdf.Write(10, tr("Esta Vereadora, submentendo este documento ao Chefe do Poder Executivo, diretamente ou através de departamento ou divisão competente,"))
+// 	pdf.SetFont("Arial", "B", 11)
+// 	pdf.Write(10, tr(" OFICIA"))
+// 	pdf.SetFont("Arial", "", 11)
+// 	pdf.Write(10, tr(" ao Senhor Prefeito Municipal, que "))
+// 	pdf.Write(10, tr(requestData.Reclamacao+"."))
+// 	pdf.Ln(15)
 
-	pdf.SetFont("Arial", "", 11)
-	pdf.Cell(0, 10, tr("Nestes termos,"))
-	pdf.Ln(5)
-	pdf.Cell(0, 10, tr("Aguarda deferimento."))
-	pdf.Ln(30)
+// 	pdf.SetFont("Arial", "", 11)
+// 	pdf.Cell(0, 10, tr("Nestes termos,"))
+// 	pdf.Ln(5)
+// 	pdf.Cell(0, 10, tr("Aguarda deferimento."))
+// 	pdf.Ln(30)
 
-	pdf.Cell(0, 10, tr(dataExtenso()))
-	pdf.Ln(20)
+// 	pdf.Cell(0, 10, tr(dataExtenso()))
+// 	pdf.Ln(20)
 
-	pdf.SetFont("Arial", "B", 11)
-	pdf.CellFormat(0, 10, tr("VEREADORA JUSSARA FERNANDES"), "", 1, "C", false, 0, "")
+// 	pdf.SetFont("Arial", "B", 11)
+// 	pdf.CellFormat(0, 10, tr("VEREADORA JUSSARA FERNANDES"), "", 1, "C", false, 0, "")
 
-	return pdf.OutputFileAndClose("oficio.pdf")
-}
+// 	return pdf.OutputFileAndClose("oficio.pdf")
+// }

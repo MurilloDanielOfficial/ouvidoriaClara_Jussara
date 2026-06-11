@@ -74,13 +74,13 @@ func (ctrl ReclamacaoController) AprovarRequerimento(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Requerimento aprovado e enviado com sucesso!"})
 }
 
-func (ctrl ReclamacaoController) AprovarOficio(c *gin.Context) {
-	if err := ctrl.useCase.AprovarOficio(c.Param("id")); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Ofício aprovado e enviado com sucesso!"})
-}
+// func (ctrl ReclamacaoController) AprovarOficio(c *gin.Context) {
+// 	if err := ctrl.useCase.AprovarOficio(c.Param("id")); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, gin.H{"message": "Ofício aprovado e enviado com sucesso!"})
+// }
 
 func (ctrl ReclamacaoController) AprovarComoAmbos(c *gin.Context) {
 	if err := ctrl.useCase.AprovarComoAmbos(c.Param("id")); err != nil {

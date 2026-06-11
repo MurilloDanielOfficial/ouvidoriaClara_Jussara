@@ -59,8 +59,8 @@ func EnviaRequerimento(data models.Inquerito) (bool, error) {
 		func() error { return GenerateRequerimento(data) })
 }
 
-func EnviaOficio(data models.Inquerito) (bool, error) {
-	return enviaDocumento("oficio.pdf", "ofício",
-		"Segue em anexo um ofício requisitado por um munícipe de São Roque, obrigado!.",
-		func() error { return GenerateOficio(data) })
-}
+// func EnviaOficio(data models.Inquerito) (bool, error) {
+// 	return enviaDocumento("oficio.pdf", "ofício",
+// 		"Segue em anexo um ofício requisitado por um munícipe de São Roque, obrigado!.",
+// 		func() error { return GenerateOficio(data) })
+// }
