@@ -5,6 +5,7 @@ import (
 	"back-end/models"
 	"back-end/usecases"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -101,6 +102,7 @@ func (ctrl ReclamacaoController) ReprovarInquerito(c *gin.Context) {
 func (ctrl ReclamacaoController) CreateOcorrencia(c *gin.Context) {
 	var req models.OcorrenciaRequest
 	if err := c.BindJSON(&req); err != nil {
+		fmt.Println("erro ao bindar ocorrencia: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Formato inválido.", "error": err.Error()})
 		return
 	}
@@ -109,9 +111,11 @@ func (ctrl ReclamacaoController) CreateOcorrencia(c *gin.Context) {
 	if err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) {
+			fmt.Println("erro ao criar ocorrencia: ", err)
 			c.IndentedJSON(appErr.StatusCode, gin.H{"error": appErr.Message})
 			return
 		}
+		fmt.Println("erro ao criar ocorrencia: ", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
