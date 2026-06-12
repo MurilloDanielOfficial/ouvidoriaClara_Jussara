@@ -131,8 +131,10 @@ func (ctrl *ClienteController) CreateClienteDify(c *gin.Context) {
 	if err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) {
+			fmt.Println("erro ao criar cliente: ",err)
 			c.JSON(appErr.StatusCode, gin.H{"error": appErr.Message})
 		} else {
+			fmt.Println("erro ao criar cliente: ",err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar cliente", "valido": false, "details": err.Error()})
 		}
 		return
