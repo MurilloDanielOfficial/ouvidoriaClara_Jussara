@@ -95,7 +95,8 @@ func main() {
 	go config.CheckInativos1Day(dbConnection)
 
 	enderecoUC := usecases.NewEnderecoUseCases(repository.NewEnderecoRepository(dbConnection))
-	routes.SetupReclamacaoRoutes(server, controllers.NewReclamacaoController(usecases.NewReclamacaoUseCases(repository.NewReclamacaoRepository(dbConnection), enderecoUC)))
+	clienteUC := usecases.NewClienteUseCase(repository.NewClienteRepo(dbConnection))
+	routes.SetupReclamacaoRoutes(server, controllers.NewReclamacaoController(usecases.NewReclamacaoUseCases(repository.NewReclamacaoRepository(dbConnection), enderecoUC, *clienteUC)))
 	routes.SetupEnderecoRoutes(server, controllers.NewEnderecoController(enderecoUC))
 	routes.SetupProtocoloRoutes(server, controllers.NewProtocoloController(usecases.NewProtocoloUseCases(repository.NewProtocoloRepository(dbConnection))))
 	routes.SetupStatsRoutes(server, controllers.NewStatsController(usecases.NewStatsUseCases(repository.NewStatsRepository(dbConnection))))
@@ -106,7 +107,7 @@ func main() {
 	routes.SetUsuarioRoutes(server, controllers.NewUsuarioController(usecases.NewUsuarioUseCases(repository.NewUsuarioRepository(dbConnection))))
 	routes.SetupLeadRoutes(server, controllers.NewLeadController(usecases.NewLeadUseCases(repository.NewLeadRepository(dbConnection))))
 
-	routes.SetupClienteRoutes(server, controllers.NewClienteController(usecases.NewClienteUseCase(repository.NewClienteRepo(dbConnection))))
+	routes.SetupClienteRoutes(server, controllers.NewClienteController(clienteUC))
 
 	portBack := os.Getenv("PORT")
 	fmt.Println("Servidor rodando na porta: ", portBack)

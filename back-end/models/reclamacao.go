@@ -33,10 +33,15 @@ type Reclamacao struct {
 }
 
 type OcorrenciaRequest struct {
-	Telefone         string `json:"telefone"`
-	SituacaoResumida string `json:"situacaoResumida"`
-	Categoria        string `json:"categoria"`
-	EhManual         bool   `json:"ehManual"`
+	Telefone              string `json:"telefone"`
+	NomeCliente           string `json:"nomeCliente"`
+	EnderecoCliente       string `json:"enderecoCliente"`
+	BairroCliente         string `json:"bairroCliente"`
+	CidadeCliente         string `json:"cidadeCliente"`
+	DataNascimentoCliente string `json:"dataNascimentoCliente"`
+	SituacaoResumida      string `json:"situacaoResumida"`
+	Categoria             string `json:"categoria"`
+	EhManual              bool   `json:"ehManual"`
 	DetalhesReclamacao
 }
 

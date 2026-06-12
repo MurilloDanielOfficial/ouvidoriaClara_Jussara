@@ -17,10 +17,11 @@ var categorias = []string{"geral", "maus tratos", "abandono presenciado", "anima
 type ReclamacaoUseCases struct {
 	repository repository.ReclamacaoRepository
 	enderecoUC EnderecoUseCases
+	clienteUC  ClienteUseCase
 }
 
-func NewReclamacaoUseCases(repo repository.ReclamacaoRepository, enderecoUC EnderecoUseCases) ReclamacaoUseCases {
-	return ReclamacaoUseCases{repository: repo, enderecoUC: enderecoUC}
+func NewReclamacaoUseCases(repo repository.ReclamacaoRepository, enderecoUC EnderecoUseCases, clienteUC ClienteUseCase) ReclamacaoUseCases {
+	return ReclamacaoUseCases{repository: repo, enderecoUC: enderecoUC, clienteUC: clienteUC}
 }
 
 func ehCategoria(str string) bool {
@@ -162,9 +163,30 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 	if request.Telefone == "" {
 		return 0, apperror.BadRequest("Telefone obrigatório")
 	}
+
 	request.Categoria = strings.ToLower(request.Categoria)
 	if !ehCategoria(request.Categoria) {
 		return 0, apperror.BadRequest("Categoria inválida")
+	}
+
+	existe, _, err := uc.clienteUC.ClienteExiste(request.Telefone)
+	if err != nil {
+		return 0, apperror.NotFound("Erro ao verificar cliente existe")
+	}
+
+	if !existe {
+		cliente := models.Cliente{
+			Telefone:       request.Telefone,
+			Nome:           request.NomeCliente,
+			Cidade:         request.CidadeCliente,
+			Endereco:       request.EnderecoCliente,
+			Bairro:         request.BairroAnimal,
+			DataNascimento: request.DataNascimentoCliente,
+		}
+		_, err := uc.clienteUC.repo.CreateCliente(cliente)
+		if err != nil {
+			return 0, apperror.Internal("Erro ao cadastrar novo cliente")
+		}
 	}
 
 	request.Telefone = normalizeTelefone(request.Telefone)
