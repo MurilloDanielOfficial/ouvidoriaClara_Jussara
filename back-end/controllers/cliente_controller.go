@@ -5,6 +5,7 @@ import (
 	"back-end/models"
 	"back-end/usecases"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,7 @@ func (ctrl *ClienteController) CreateCliente(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Telefone obrigatório."})
 		return
 	}
-	if err := ctrl.usecase.CreateCliente(cliente); err != nil {
+	if _, err := ctrl.usecase.CreateCliente(cliente); err != nil {
 		var appErr *apperror.AppError
 		if errors.As(err, &appErr) {
 			c.IndentedJSON(appErr.StatusCode, gin.H{"error": appErr.Message})
@@ -100,4 +101,41 @@ func (ctrl *ClienteController) DeleteCliente(c *gin.Context) {
 		return
 	}
 	c.String(http.StatusOK, "Deletado")
+}
+
+func (ctrl *ClienteController) ClienteExiste(c *gin.Context) {
+	telefone := c.Param("telefone")
+	existe, cliente, err := ctrl.usecase.ClienteExiste(telefone)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		fmt.Println(err.Error())
+		return
+	}
+
+	if !existe {
+		c.JSON(http.StatusOK, existe)
+		return
+	}
+	c.JSON(http.StatusOK, cliente)
+}
+
+func (ctrl *ClienteController) CreateClienteDify(c *gin.Context) {
+	var cliente models.Cliente
+	if err := c.ShouldBindJSON(&cliente); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos", "valido": false, "details": err.Error()})
+		fmt.Println("Erro ao bindar cliente:", err)
+		return
+	}
+
+	err := ctrl.usecase.CreateClienteDify(&cliente)
+	if err != nil {
+		var appErr *apperror.AppError
+		if errors.As(err, &appErr) {
+			c.JSON(appErr.StatusCode, gin.H{"error": appErr.Message})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar cliente", "valido": false, "details": err.Error()})
+		}
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"telefone": cliente.Telefone, "message": "Cliente criado com sucesso", "valido": true})
 }

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"back-end/models"
+	"database/sql"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -14,10 +16,11 @@ func NewClienteRepo(db *sqlx.DB) *ClienteRepo {
 	return &ClienteRepo{db: db}
 }
 
-func (r *ClienteRepo) CreateCliente(c models.Cliente) error {
-	const query = `INSERT INTO cliente (telefone, nome, cidade, endereco, bairro, data_nascimento) VALUES ($1,$2,$3,$4,$5,$6)`
-	_, err := r.db.Exec(query, c.Telefone, c.Nome, c.Cidade, c.Endereco, c.Bairro, c.DataNascimento)
-	return err
+func (r *ClienteRepo) CreateCliente(c models.Cliente) (string, error) {
+	const query = `INSERT INTO cliente (telefone, nome, cidade, endereco, bairro, data_nascimento) VALUES ($1,$2,$3,$4,$5,$6) RETURNING telefone;`
+	var telefone string
+	err := r.db.Get(&telefone, query, c.Telefone, c.Nome, c.Cidade, c.Endereco, c.Bairro, c.DataNascimento)
+	return telefone, err
 }
 
 func (r *ClienteRepo) GetClienteByTelefone(telefone string) (models.Cliente, error) {
@@ -44,4 +47,19 @@ func (r *ClienteRepo) DeleteCliente(telefone string) error {
 	const query = `DELETE FROM cliente WHERE telefone = $1`
 	_, err := r.db.Exec(query, telefone)
 	return err
+}
+
+func (r *ClienteRepo) ClienteExiste(telefoneCliente string) (bool, *models.Cliente, error) {
+	const query = `SELECT * FROM cliente WHERE telefonecliente = $1`
+
+	var cliente models.Cliente
+	err := r.db.Get(&cliente, query, telefoneCliente)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil, nil
+		}
+		return false, nil, fmt.Errorf("erro ao verificar existência do cliente: %w", err)
+	}
+
+	return true, &cliente, nil
 }
