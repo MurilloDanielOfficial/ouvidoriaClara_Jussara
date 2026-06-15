@@ -95,3 +95,38 @@ func validarCampos(campos ...string) bool {
 	}
 	return true
 }
+
+func (uc ClienteUseCase) GetClienteBloqueadoById(telefoneCliente string) error {
+	return uc.repo.GetClienteBloqueadoById(telefoneCliente)
+}
+
+func (uc ClienteUseCase) SetClienteBloqueado(idCliente string) error {
+	return  uc.repo.SetClienteBloqueado(idCliente)
+}
+
+func (uc ClienteUseCase) DeleteClienteBloqueadoByID(idCliente string) error {
+	return uc.repo.DeleteClienteBloqueadoByID(idCliente)
+}
+
+func (usecase ClienteUseCase) GetClientesGelo() ([]models.ClienteGelo, error) {
+	return usecase.repo.GetClientesGelo()
+}
+
+func (usecase ClienteUseCase) ExisteCliente(telefone string) (bool, error) {
+	_, err := usecase.GetClienteByTelefone(telefone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func (usecase ClienteUseCase) GetClienteAtivo(telefone string) (bool, error) {
+	return usecase.repo.GetClienteAtivo(telefone)
+}
+
+func (usecase ClienteUseCase) GetDadosCliente(telefone string) (models.ClienteDadosDTO, error) {
+	return usecase.repo.GetDadosCliente(telefone)
+}

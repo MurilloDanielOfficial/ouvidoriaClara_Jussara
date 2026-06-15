@@ -3,6 +3,7 @@ package repository
 import (
 	"back-end/models"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -62,4 +63,82 @@ func (r *ClienteRepo) ClienteExiste(telefoneCliente string) (bool, *models.Clien
 	}
 
 	return true, &cliente, nil
+}
+
+func (repo ClienteRepo) GetClienteBloqueadoById(telefoneCliente string) error {
+	query := `SELECT idcliente FROM clientesbloqueados WHERE idcliente = $1`
+
+	var bloqueado string
+	err := repo.db.Get(&bloqueado, query, telefoneCliente)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo ClienteRepo) SetClienteBloqueado(idCliente string) error {
+	query := `INSERT INTO clientesbloqueados (idcliente) VALUES ($1) ON CONFLICT DO NOTHING`
+
+	_, err := repo.db.Exec(query, idCliente)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo ClienteRepo) DeleteClienteBloqueadoByID(idCliente string) error {
+	query := `DELETE FROM clientesbloqueados WHERE idcliente = $1`
+
+	_, err := repo.db.Exec(query, idCliente)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo ClienteRepo) GetClientesGelo() ([]models.ClienteGelo, error) {
+	const query = `SELECT c.nome, c.telefone, c.ativo
+					FROM contatos c
+					LEFT JOIN reclamacao r ON c.telefone = r.telefone
+					WHERE c.telefone IS NULL`
+
+	var clientes []models.ClienteGelo
+	err := repo.db.Select(&clientes, query)
+	if err != nil {
+		return nil, err
+	}
+	return clientes, nil
+}
+
+func (repo ClienteRepo) GetClienteAtivo(telefone string) (bool, error) {
+	const query = `
+		SELECT 1
+		FROM cliente
+		WHERE telefone = $1
+	`
+
+	var exists int
+	err := repo.db.Get(&exists, query, telefone)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (repo ClienteRepo) GetDadosCliente(telefone string) (models.ClienteDadosDTO, error) {
+	const query = `
+		SELECT nomecliente, telefone
+		FROM cliente
+		WHERE telefone = $1
+	`
+	var dados models.ClienteDadosDTO
+	err := repo.db.Get(&dados, query, telefone)
+	if err != nil {
+		return models.ClienteDadosDTO{}, fmt.Errorf("erro ao buscar dados do cliente: %v", err)
+	}
+	return dados, nil
 }
