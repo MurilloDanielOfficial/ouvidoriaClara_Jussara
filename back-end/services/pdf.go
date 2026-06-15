@@ -3,7 +3,6 @@ package services
 import (
 	"back-end/models"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -30,7 +29,7 @@ func novoCabecalho(titulo string) *gofpdf.Fpdf {
 
 	logoFile := logoPath()
 	if _, err := os.Stat(logoFile); os.IsNotExist(err) {
-		log.Printf("Atenção: Logo não encontrado em %s", logoFile)
+		fmt.Printf("Atenção: Logo não encontrado em %s", logoFile)
 	} else {
 		pdf.ImageOptions(logoFile, 20, 15, 170, 30, false, gofpdf.ImageOptions{ImageType: "PNG", ReadDpi: true}, 0, "")
 	}
