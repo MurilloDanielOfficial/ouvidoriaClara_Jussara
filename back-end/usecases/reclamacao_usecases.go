@@ -88,6 +88,32 @@ func (uc ReclamacaoUseCases) AprovarInquerito(id string) error {
 	// }
 	return nil
 }
+func (uc ReclamacaoUseCases) ColocarEmAnalise(id string) error {
+	if err := uc.repository.UpdateStatusTipo(id, "em análise", ""); err != nil {
+		return err
+	}
+	// data, err := uc.repository.GetReclamacaoById(id)
+	// if err != nil {
+	// 	return err
+	// }
+	// if _, err := services.EnviaInquerito(*data); err != nil {
+	// 	return err
+	// }
+	return nil
+}
+func (uc ReclamacaoUseCases) ColocarComoCriado(id string) error {
+	if err := uc.repository.UpdateStatusTipo(id, "criado", ""); err != nil {
+		return err
+	}
+	// data, err := uc.repository.GetReclamacaoById(id)
+	// if err != nil {
+	// 	return err
+	// }
+	// if _, err := services.EnviaInquerito(*data); err != nil {
+	// 	return err
+	// }
+	return nil
+}
 
 func (uc ReclamacaoUseCases) AprovarRequerimento(id string) error {
 	if err := uc.repository.UpdateStatusTipo(id, "aprovado", "requerimento"); err != nil {

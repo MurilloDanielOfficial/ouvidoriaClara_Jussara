@@ -67,6 +67,21 @@ func (ctrl ReclamacaoController) AprovarInquerito(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Inquerito aprovado e enviado com sucesso!"})
 }
 
+func (ctrl ReclamacaoController) ColocarEmAnalise(c *gin.Context) {
+	if err := ctrl.useCase.ColocarEmAnalise(c.Param("id")); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Inquerito aprovado e enviado com sucesso!"})
+}
+func (ctrl ReclamacaoController) ColocarComoCriado(c *gin.Context) {
+	if err := ctrl.useCase.ColocarComoCriado(c.Param("id")); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Inquerito aprovado e enviado com sucesso!"})
+}
+
 func (ctrl ReclamacaoController) AprovarRequerimento(c *gin.Context) {
 	if err := ctrl.useCase.AprovarRequerimento(c.Param("id")); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

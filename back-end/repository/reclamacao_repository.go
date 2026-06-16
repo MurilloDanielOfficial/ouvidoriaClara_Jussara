@@ -41,9 +41,9 @@ func (repo ReclamacaoRepository) UpdateStatusTipo(id, status, tipo string) error
 	return err
 }
 
-func (repo ReclamacaoRepository) GetReclamacaoById(id string) (*models.Inquerito, error) {
-	const query = `SELECT idreclamacao, reclamacao, nome, telefone, categoria, regiao FROM reclamacao WHERE idreclamacao = $1`
-	var data models.Inquerito
+func (repo ReclamacaoRepository) GetReclamacaoById(id string) (*models.Ocorrencia, error) {
+	const query = `SELECT * FROM reclamacao WHERE idreclamacao = $1`
+	var data models.Ocorrencia
 	err := repo.connection.Get(&data, query, id)
 	if err != nil {
 		return nil, err
