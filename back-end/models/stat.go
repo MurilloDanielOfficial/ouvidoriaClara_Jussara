@@ -6,8 +6,8 @@ type Regiao struct {
 }
 
 type Stat struct {
-	NumPessoas             int              `json:"numPessoas"`             //total de contatos
-	NumReclamacoes         int              `json:"numReclamacoes"`         //total de reclamacoes
+	NumPessoas             int              `json:"numPessoas"`
+	NumReclamacoes         int              `json:"numReclamacoes"`
 	Regioes                []StatsRegiao    `json:"regioes"`
 	Categorias             []StatsCategoria `json:"categorias"`
 	Tipos                  []StatsTipo      `json:"tipos"`
