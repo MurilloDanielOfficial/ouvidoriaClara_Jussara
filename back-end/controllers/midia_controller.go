@@ -47,5 +47,5 @@ func (c MidiaController) UploadMidia(ctx *gin.Context) {
 		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Erro ao salvar o link no banco de dados", "error": err.Error()})
 		return
 	}
-	ctx.IndentedJSON(http.StatusOK, gin.H{"message": "Arquivo carregado com sucesso", "file_path": filePath})
+	ctx.IndentedJSON(http.StatusOK, gin.H{"message": "Arquivo carregado com sucesso", "file_path": imageURL})
 }
