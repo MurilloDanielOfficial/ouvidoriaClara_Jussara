@@ -226,6 +226,7 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 		Reclamacao: request.SituacaoResumida,
 		Detalhes:   request.DetalhesReclamacao,
 		EhManual:   request.EhManual,
+		Observacao: request.Observacao,
 	}
 	regiao := ""
 	switch data.Categoria {

@@ -91,11 +91,11 @@ func (repo ReclamacaoRepository) CreateOcorrencia(data models.OcorrenciaData) (i
 		return 0, err
 	}
 	const query = `
-		INSERT INTO reclamacao (telefone, categoria, reclamacao, detalhes, eh_manual)
-		VALUES ($1, $2, $3, $4::jsonb, $5)
+		INSERT INTO reclamacao (telefone, categoria, reclamacao, detalhes, eh_manual, observacao)
+		VALUES ($1, $2, $3, $4::jsonb, $5, $6)
 		RETURNING idreclamacao`
 	var id int
-	err = repo.connection.QueryRow(query, data.Telefone, data.Categoria, data.Reclamacao, detalhesJSON, data.EhManual).Scan(&id)
+	err = repo.connection.QueryRow(query, data.Telefone, data.Categoria, data.Reclamacao, detalhesJSON, data.EhManual, data.Observacao).Scan(&id)
 	return id, err
 }
 
@@ -106,7 +106,7 @@ func scanOcorrencia(row interface {
 	var detalhesJSON []byte
 	if err := row.Scan(
 		&o.ID, &o.Telefone, &o.Categoria, &o.SituacaoResumida,
-		&o.Tipo, &o.Status, &detalhesJSON, &o.EhManual, &o.DataCriacao, &o.DataAtualizacao,
+		&o.Tipo, &o.Status, &detalhesJSON, &o.EhManual, &o.Observacao, &o.DataCriacao, &o.DataAtualizacao,
 	); err != nil {
 		return o, err
 	}
@@ -121,7 +121,7 @@ func scanOcorrencia(row interface {
 
 func (repo ReclamacaoRepository) GetAllOcorrencias(telefone string) ([]models.Ocorrencia, error) {
 	const baseQuery = `
-		SELECT idreclamacao, telefone, categoria, reclamacao, tipo, status, detalhes, eh_manual, data_criacao, data_atualizacao
+		SELECT idreclamacao, telefone, categoria, reclamacao, tipo, status, detalhes, eh_manual, observacao, data_criacao, data_atualizacao
 		FROM reclamacao`
 
 	var rows *sql.Rows
@@ -149,7 +149,7 @@ func (repo ReclamacaoRepository) GetAllOcorrencias(telefone string) ([]models.Oc
 
 func (repo ReclamacaoRepository) GetOcorrenciaById(id string) (*models.Ocorrencia, error) {
 	const query = `
-		SELECT idreclamacao, telefone, categoria, reclamacao, tipo, status, detalhes, data_criacao, data_atualizacao
+		SELECT idreclamacao, telefone, categoria, reclamacao, tipo, status, detalhes, observacao, data_criacao, data_atualizacao
 		FROM reclamacao WHERE idreclamacao = $1`
 	row := repo.connection.QueryRow(query, id)
 	o, err := scanOcorrencia(row)
@@ -166,9 +166,9 @@ func (repo ReclamacaoRepository) UpdateOcorrencia(id string, data models.Ocorren
 	}
 	const query = `
 		UPDATE reclamacao
-		SET categoria = $1, reclamacao = $2, detalhes = $3::jsonb, status = $4, data_atualizacao = now(), mensagem_final = $5
-		WHERE idreclamacao = $6`
-	result, err := repo.connection.Exec(query, data.Categoria, data.Reclamacao, detalhesJSON, status, data.MensagemFinal, id)
+		SET categoria = $1, reclamacao = $2, detalhes = $3::jsonb, status = $4, data_atualizacao = now(), mensagem_final = $5, observacao = $6
+		WHERE idreclamacao = $7`
+	result, err := repo.connection.Exec(query, data.Categoria, data.Reclamacao, detalhesJSON, status, data.MensagemFinal, data.Observacao, id)
 	if err != nil {
 		return err
 	}
