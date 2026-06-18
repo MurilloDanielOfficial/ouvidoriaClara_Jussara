@@ -30,13 +30,13 @@ type StatsTipo struct {
 }
 type StatsByTipoAndStatus struct {
 	IndicacoesAprovadas  int `json:"indicacoesAprovadas" db:"indicacoes_aprovadas"`
-	IndicacoesReprovadas int `json:"indicacoesReprovadas" db:"indicacoes_reprovadas"`
-	IndicacoesEmAnalise  int `json:"indicacoesEmAnalise" db:"indicacoes_em_analise"`
+	//IndicacoesReprovadas int `json:"indicacoesReprovadas" db:"indicacoes_reprovadas"`
+	//IndicacoesEmAnalise  int `json:"indicacoesEmAnalise" db:"indicacoes_em_analise"`
 	TotalIndicacoes      int `json:"totalIndicacoes" db:"total_indicacoes"`
 
 	RequerimentosAprovadas  int `json:"requerimentosAprovados" db:"requerimentos_aprovados"`
-	RequerimentosReprovados int `json:"requerimentosReprovados" db:"requerimentos_reprovados"`
-	RequerimentosEmAnalise  int `json:"requerimentosEmAnalise" db:"requerimentos_em_analise"`
+	//RequerimentosReprovados int `json:"requerimentosReprovados" db:"requerimentos_reprovados"`
+	//RequerimentosEmAnalise  int `json:"requerimentosEmAnalise" db:"requerimentos_em_analise"`
 	TotalRequerimentos      int `json:"totalRequerimentos" db:"total_requerimentos"`
 
 	TotalReclamacoes int `json:"numReclamacoes" db:"total_reclamacao"`
