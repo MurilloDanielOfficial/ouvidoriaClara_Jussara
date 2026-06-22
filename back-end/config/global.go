@@ -12,7 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var planos = map[string]int{"bronze": 200, "prata": 1000, "ouro": 500000}
+var planos = map[string]int{"bronze": 200, "prata": 1000, "ouro": 5000}
 
 var Mensagem string
 var Respondendo bool
