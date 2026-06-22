@@ -230,7 +230,7 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 	}
 	regiao := ""
 	switch data.Categoria {
-	case "maus tratos":
+	case "maus tratos", "animais nao domiciliados":
 		regiao = uc.enderecoUC.GetRegiao(request.EnderecoOcorrencia)
 	case "animal apareceu na rua", "ajuda animal comunitario", "animal desaparecido", "animal para ser adotado":
 		regiao = uc.enderecoUC.GetRegiaoPorBairro(request.BairroAnimal)
@@ -264,6 +264,7 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 				config.EnviarMidia(telefoneEnvio, "", midia)
 			}
 		}
+		
 	}
 	//aqui limpar atividadecliente
 	return id, nil

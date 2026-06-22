@@ -77,6 +77,7 @@ type OcorrenciaUpdateRequest struct {
 	MensagemFinal    string `json:"mensagemFinal"`
 	Categoria        string `json:"categoria"`
 	Status           string `json:"status"`
+	Observacao       string `json:"observacao"`
 	DetalhesReclamacao
 }
 

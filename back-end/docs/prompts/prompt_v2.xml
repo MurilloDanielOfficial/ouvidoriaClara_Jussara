@@ -552,7 +552,10 @@
                     - Animais que estão nas ruas, negligenciados, mas possúem tutores, podem gerar brigas com outros animais, atacar pessoas e rasgar lixos em busca de alimento
                 </Identificacao>
                 Solicite:
-                - Detalhamento da denuncia (endereço da denúncia, se conhece o tutor, se sabe as condições do animal, periodicidade do acontecimento, se é a primeira vez ou já houve denúncias) → {{detalhesDenuncia}}
+                - Detalhamento da denuncia (periodicidade do acontecimento, se é a primeira vez ou já houve denúncias) → {{detalhesDenuncia}}
+                - endereco da ocorrencia → {{enderecoOcorrencia}}
+                - se conhece o tutor do animal (SIM/NÃO) → {{conheceTutor}}
+                - condições do animal (se não souber coloque "N/A") → {{condicoesAnimal}}
                 - Numero do protocolo da denúncia → {{protocoloDenuncia}}
                 <Solicitar_Midia>
                     Solicite fotos e vídeos adequados do animal e do local.
@@ -573,6 +576,9 @@
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"animais nao domiciliados",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
+                    "conheceTutor":"{{conheceTutor}}",
+                    "condicoesAnimal":"{{condicoesAnimal}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "detalhesDenuncia":"{{detalhesDenuncia}}",
                     "protocoloDenuncia":"{{protocoloDenuncia}}",
