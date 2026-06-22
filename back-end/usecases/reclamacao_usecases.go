@@ -264,7 +264,7 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 				config.EnviarMidia(telefoneEnvio, "", midia)
 			}
 		}
-		
+
 	}
 	//aqui limpar atividadecliente
 	return id, nil
@@ -333,6 +333,7 @@ func (uc ReclamacaoUseCases) UpdateOcorrencia(id string, request models.Ocorrenc
 		Reclamacao:    situacao,
 		Detalhes:      detalhes,
 		MensagemFinal: mensagemFinal,
+		Observacao:    request.Observacao,
 	}
 
 	if err := uc.repository.UpdateOcorrencia(id, data, status); err != nil {
