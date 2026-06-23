@@ -220,11 +220,11 @@ const ContatosPage: React.FC = () => {
   }
 
   const columnColors: Record<string, string> = {
-    'pendentes': '#8b94a8',
-    'em-analise': '#0a84ff',
-    'aprovar-indicacao': '#1eb859',
-    'aprovar-requerimento': '#f06517',
-    'reprovar': '#e63946',
+    'pendentes': '#A1A9B8',
+    'em-analise': '#62A1D8',
+    'aprovar-indicacao': '#66BB80',
+    'aprovar-requerimento': '#E89E70',
+    'reprovar': '#D16670',
   }
 
   const handleVerOcorrencias = async (c: ContatoUnificado) => {
@@ -655,10 +655,10 @@ const ContatosPage: React.FC = () => {
                       </Box>
                     )}
                     {o.ehManual && (
-                      <Box sx={{ fontSize: 10, fontWeight: 700, color: '#f06517', bgcolor: '#f0651715', px: 1, py: 0.3, borderRadius: 1 }}>Manual</Box>
+                      <Box sx={{ fontSize: 10, fontWeight: 700, color: '#E89E70', bgcolor: '#E89E7015', px: 1, py: 0.3, borderRadius: 1 }}>Manual</Box>
                     )}
                   </Box>
-                  <Box sx={{ fontSize: 10, fontWeight: 700, color: '#fff', bgcolor: columnColors[getColumnId(o)] || '#8b94a8', px: 1, py: 0.3, borderRadius: 1 }}>
+                  <Box sx={{ fontSize: 10, fontWeight: 700, color: '#fff', bgcolor: columnColors[getColumnId(o)] || '#A1A9B8', px: 1, py: 0.3, borderRadius: 1 }}>
                     {columnLabels[getColumnId(o)] ?? o.status}
                   </Box>
                 </Box>

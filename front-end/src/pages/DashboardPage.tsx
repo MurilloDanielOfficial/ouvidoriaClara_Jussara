@@ -54,11 +54,11 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, color = '
       {trend && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
           {trend.direction === 'up' ? (
-            <TrendingUp size={16} color="#1eb859" />
+            <TrendingUp size={16} color="#66BB80" />
           ) : trend.direction === 'down' ? (
-            <TrendingDown size={16} color="#e63946" />
+            <TrendingDown size={16} color="#D16670" />
           ) : null}
-          <Typography sx={{ fontSize: 11, fontWeight: 600, color: trend.direction === 'up' ? '#1eb859' : trend.direction === 'down' ? '#e63946' : 'hsl(var(--text-secondary))' }}>
+          <Typography sx={{ fontSize: 11, fontWeight: 600, color: trend.direction === 'up' ? '#66BB80' : trend.direction === 'down' ? '#D16670' : 'hsl(var(--text-secondary))' }}>
             {trend.direction === 'up' ? '↑' : trend.direction === 'down' ? '↓' : '—'} {Math.abs(trend.percent).toFixed(0)}% vs período anterior
           </Typography>
         </Box>
@@ -277,21 +277,21 @@ const DashboardPage: React.FC = () => {
       <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2.5, alignItems: 'stretch' }}>
         {/* Coluna 1 — Indicações */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <StatCard sx={{ flex: 1 }} label="Total de Indicações" value={computedStats?.totalIndicacoes ?? 0} icon={BarChart3} color="#1eb859" trend={trends.indicacoes} />
-          <StatCard sx={{ flex: 1 }} label="Taxa de Conversão Indicações" value={`${(computedStats?.percIndicacao ?? 0).toFixed(1)}%`} icon={TrendingUp} color="#1eb859" subtitle="Percentual de reclamações classificadas como indicação em relação ao total de reclamações" />
+          <StatCard sx={{ flex: 1 }} label="Total de Indicações" value={computedStats?.totalIndicacoes ?? 0} icon={BarChart3} color="#66BB80" trend={trends.indicacoes} />
+          <StatCard sx={{ flex: 1 }} label="Taxa de Conversão Indicações" value={`${(computedStats?.percIndicacao ?? 0).toFixed(1)}%`} icon={TrendingUp} color="#66BB80" subtitle="Percentual de reclamações classificadas como indicação em relação ao total de reclamações" />
         </Box>
 
         {/* Coluna 2 — Requerimentos */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <StatCard sx={{ flex: 1 }} label="Total de Requerimentos" value={computedStats?.totalRequerimentos ?? 0} icon={FileText} color="#f06517" trend={trends.requerimentos} />
-          <StatCard sx={{ flex: 1 }} label="Taxa de Conversão Requerimentos" value={`${(computedStats?.percRequerimento ?? 0).toFixed(1)}%`} icon={TrendingUp} color="#f06517" subtitle="Percentual de reclamações classificadas como requerimento em relação ao total de reclamações" />
+          <StatCard sx={{ flex: 1 }} label="Total de Requerimentos" value={computedStats?.totalRequerimentos ?? 0} icon={FileText} color="#E89E70" trend={trends.requerimentos} />
+          <StatCard sx={{ flex: 1 }} label="Taxa de Conversão Requerimentos" value={`${(computedStats?.percRequerimento ?? 0).toFixed(1)}%`} icon={TrendingUp} color="#E89E70" subtitle="Percentual de reclamações classificadas como requerimento em relação ao total de reclamações" />
         </Box>
 
         {/* Coluna 3 — Gerais (3 cards, crescem para igualar altura) */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <StatCard sx={{ flex: 1 }} label="Total de Reclamações" value={computedStats?.numReclamacoes ?? 0} icon={FileText} color="#223872" trend={trends.reclamacoes} />
-          <StatCard sx={{ flex: 1 }} label="Total de Pessoas Atendidas" value={computedStats?.numPessoas ?? 0} icon={Users} color="#0a84ff" trend={trends.pessoas} />
-          <StatCard sx={{ flex: 1 }} label="Tempo Médio de Resolução" value={tempoMedioResolucao ?? '-'} icon={Clock} color="#8b94a8" subtitle="Tempo médio entre criação e resolução (aprovação/reprovação)" />
+          <StatCard sx={{ flex: 1 }} label="Total de Reclamações" value={computedStats?.numReclamacoes ?? 0} icon={FileText} color="#41669C" trend={trends.reclamacoes} />
+          <StatCard sx={{ flex: 1 }} label="Total de Pessoas Atendidas" value={computedStats?.numPessoas ?? 0} icon={Users} color="#62A1D8" trend={trends.pessoas} />
+          <StatCard sx={{ flex: 1 }} label="Tempo Médio de Resolução" value={tempoMedioResolucao ?? '-'} icon={Clock} color="#A1A9B8" subtitle="Tempo médio entre criação e resolução (aprovação/reprovação)" />
         </Box>
       </Box>
 

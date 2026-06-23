@@ -32,11 +32,11 @@ interface ColumnDef {
 }
 
 const COLUMNS: ColumnDef[] = [
-  { id: 'pendentes', label: 'Reclamações Pendentes', color: '#8b94a8', headerBg: 'hsl(var(--text-secondary) / 0.12)' },
-  { id: 'em-analise', label: 'Em Análise', color: '#0a84ff', headerBg: 'hsl(var(--info) / 0.12)' },
-  { id: 'aprovar-indicacao', label: 'Aprovar como Indicação', color: '#1eb859', headerBg: 'hsl(var(--success) / 0.12)' },
-  { id: 'aprovar-requerimento', label: 'Aprovar como Requerimento', color: '#f06517', headerBg: 'hsl(var(--accent) / 0.12)' },
-  { id: 'reprovar', label: 'Reprovar', color: '#e63946', headerBg: 'hsl(var(--error) / 0.12)' },
+  { id: 'pendentes', label: 'Reclamações Pendentes', color: '#A1A9B8', headerBg: 'hsl(var(--text-secondary) / 0.12)' },
+  { id: 'em-analise', label: 'Em Análise', color: '#62A1D8', headerBg: 'hsl(var(--info) / 0.12)' },
+  { id: 'aprovar-indicacao', label: 'Aprovar como Indicação', color: '#66BB80', headerBg: 'hsl(var(--success) / 0.12)' },
+  { id: 'aprovar-requerimento', label: 'Aprovar como Requerimento', color: '#E89E70', headerBg: 'hsl(var(--accent) / 0.12)' },
+  { id: 'reprovar', label: 'Reprovar', color: '#D16670', headerBg: 'hsl(var(--error) / 0.12)' },
 ]
 
 const CATEGORIAS = [
@@ -302,7 +302,7 @@ const FormFields: React.FC<{
                 <TextField label="Telefone do Responsável" fullWidth value={form.telefoneResponsavelAnimal} onChange={(e) => handleTelResp(e.target.value)} variant="filled" sx={inputSx} placeholder="(XX) XXXXX-XXXX" inputProps={{ autoComplete: 'off' }} />
                 {autoFilledResp && (
                   <Tooltip title="Nome do responsável preenchido automaticamente">
-                    <Box sx={{ mt: 1.5, color: '#1eb859', display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ mt: 1.5, color: '#66BB80', display: 'flex', alignItems: 'center' }}>
                       <CheckCircle size={20} />
                     </Box>
                   </Tooltip>
@@ -887,11 +887,11 @@ const ReclamacoesPage: React.FC = () => {
   }
 
   const cardBorderLeft: Record<string, string> = {
-    pendentes: '#8b94a8',
-    'em-analise': '#0a84ff',
-    'aprovar-indicacao': '#1eb859',
-    'aprovar-requerimento': '#f06517',
-    reprovar: '#e63946',
+    pendentes: '#A1A9B8',
+    'em-analise': '#62A1D8',
+    'aprovar-indicacao': '#66BB80',
+    'aprovar-requerimento': '#E89E70',
+    reprovar: '#D16670',
   }
 
   const handleTelefoneChange = (value: string) => {
@@ -1259,9 +1259,9 @@ const ReclamacoesPage: React.FC = () => {
                         const urgency = getUrgencyLevel(row.dataAtualizacao)
                         const diffDays = Math.floor((Date.now() - new Date(row.dataAtualizacao).getTime()) / (1000 * 60 * 60 * 24))
                         const urgencyConfig = {
-                          high: { bg: '#0a84ff', text: 'Urgente' },
-                          medium: { bg: '#f4a261', text: 'Atenção' },
-                          low: { bg: '#1eb859', text: 'Recente' },
+                          high: { bg: '#62A1D8', text: 'Urgente' },
+                          medium: { bg: '#E2AF7A', text: 'Atenção' },
+                          low: { bg: '#66BB80', text: 'Recente' },
                         }[urgency]
                         return (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, px: 1.5, py: 0.5, mb: 1, borderRadius: 1, bgcolor: `${urgencyConfig.bg}20`, borderLeft: `3px solid ${urgencyConfig.bg}`, fontSize: 10, fontWeight: 700, color: urgencyConfig.bg, textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
@@ -1295,7 +1295,7 @@ const ReclamacoesPage: React.FC = () => {
                       {/* manual badge centered below name */}
                       {row.ehManual && (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0.5, mb: 0.5 }}>
-                          <Box sx={{ fontSize: 10, fontWeight: 700, color: '#f06517', bgcolor: 'hsl(var(--accent) / 0.12)', px: 1, py: 0.3, borderRadius: 1 }}>
+                          <Box sx={{ fontSize: 10, fontWeight: 700, color: '#E89E70', bgcolor: 'hsl(var(--accent) / 0.12)', px: 1, py: 0.3, borderRadius: 1 }}>
                             Manual
                           </Box>
                         </Box>
@@ -1382,42 +1382,42 @@ const ReclamacoesPage: React.FC = () => {
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', pt: 1, borderTop: '1px solid hsl(var(--surface-2))', flexWrap: 'wrap', flexShrink: 0 }}>
                         {isMobile && col.id === 'pendentes' && (
                           <>
-                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#0a84ff', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
-                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#1eb859', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
-                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#f06517', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
+                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#62A1D8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
+                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#66BB80', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
+                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#E89E70', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
                             <Button size="small" startIcon={<XCircle size={14} />} onClick={() => doAction(() => reprovarInquerito(row.id), 'Reprovar', `Confirmar reprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: 'hsl(var(--error))', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--error) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Reprovar</Button>
                           </>
                         )}
                         {isMobile && col.id === 'em-analise' && (
                           <>
-                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#1eb859', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
-                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#f06517', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
+                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#66BB80', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
+                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#E89E70', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
                             <Button size="small" startIcon={<XCircle size={14} />} onClick={() => doAction(() => reprovarInquerito(row.id), 'Reprovar', `Confirmar reprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: 'hsl(var(--error))', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--error) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Reprovar</Button>
-                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#8b94a8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
+                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#A1A9B8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
                           </>
                         )}
                         {isMobile && col.id === 'aprovar-indicacao' && (
                           <>
-                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#0a84ff', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
-                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#f06517', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
+                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#62A1D8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
+                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#E89E70', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
                             <Button size="small" startIcon={<XCircle size={14} />} onClick={() => doAction(() => reprovarInquerito(row.id), 'Reprovar', `Confirmar reprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: 'hsl(var(--error))', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--error) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Reprovar</Button>
-                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#8b94a8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
+                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#A1A9B8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
                           </>
                         )}
                         {isMobile && col.id === 'aprovar-requerimento' && (
                           <>
-                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#0a84ff', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
-                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#1eb859', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
+                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#62A1D8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
+                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#66BB80', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
                             <Button size="small" startIcon={<XCircle size={14} />} onClick={() => doAction(() => reprovarInquerito(row.id), 'Reprovar', `Confirmar reprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: 'hsl(var(--error))', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--error) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Reprovar</Button>
-                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#8b94a8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
+                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#A1A9B8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
                           </>
                         )}
                         {isMobile && col.id === 'reprovar' && (
                           <>
-                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#0a84ff', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
-                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#1eb859', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
-                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#f06517', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
-                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#8b94a8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
+                            <Button size="small" startIcon={<Eye size={14} />} onClick={() => doAction(() => colocarEmAnalise(row.id), 'Enviar para Em Análise', `Confirmar envio #${row.id} para análise?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#62A1D8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--info) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Em Análise</Button>
+                            <Button size="small" startIcon={<CheckCircle size={14} />} onClick={() => doAction(() => aprovarInquerito(row.id), 'Aprovar como Indicação', `Confirmar aprovação #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#66BB80', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--success) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Indicação</Button>
+                            <Button size="small" startIcon={<FileText size={14} />} onClick={() => doAction(() => aprovarRequerimento(row.id), 'Aprovar como Requerimento', `Confirmar requerimento #${row.id}?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#E89E70', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--accent) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Requerimento</Button>
+                            <Button size="small" startIcon={<ChevronLeft size={14} />} onClick={() => doAction(() => colocarComoCriado(row.id), 'Enviar para Pendentes', `Confirmar envio #${row.id} para pendentes?`)} sx={{ flex: '1 1 calc(50% - 8px)', color: '#A1A9B8', textTransform: 'none', fontSize: 11, border: '1px solid hsl(var(--text-secondary) / 0.2)', borderRadius: 1.5, px: 1.5 }}>Pendentes</Button>
                           </>
                         )}
                       </Box>
