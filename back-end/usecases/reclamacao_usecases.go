@@ -244,6 +244,9 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 		case "animal apareceu na rua", "ajuda animal comunitario", "animal desaparecido", "animal para ser adotado":
 			regiao = uc.enderecoUC.GetRegiaoPorBairro(request.BairroAnimal)
 		default: // ideia que não sei se pode valer a pena
+			if request.EnderecoOcorrencia != ""{
+				regiao = uc.enderecoUC.GetRegiao(request.EnderecoOcorrencia)
+			}
 			regiao = uc.enderecoUC.GetRegiao(cliente.Endereco + "," + cliente.Bairro)
 		}
 	}
