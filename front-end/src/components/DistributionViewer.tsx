@@ -17,7 +17,7 @@ interface DistributionViewerProps {
 type Tab = 'regiao' | 'categoria' | 'tipo'
 
 const PIE_COLORS = [
-  '#223872', '#f06517', '#1eb859', '#0a84ff', '#f4a261', '#8b94a8', '#2d4a8a', '#169a4d',
+  '#41669C', '#E89E70', '#66BB80', '#62A1D8', '#E2AF7A', '#A1A9B8', '#5282AE', '#53A16E',
   '#e63946', '#7b2cbf', '#3a86ff', '#ffbe0b', '#fb5607', '#8338ec', '#06d6a0', '#ef476f',
   '#118ab2', '#ffd166', '#073b4c', '#7209b7', '#560bad', '#f72585', '#4361ee', '#4cc9f0',
   '#80b918', '#55a630', '#2b9348', '#007f5f', '#aacc00', '#d4d700', '#e9c46a', '#e76f51',
