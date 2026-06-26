@@ -221,11 +221,14 @@
                     - Recapeamento de vias, instalações de lombadas
                     - Reparos em tubulaçõe e vazamentos em vias públicas
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas de asfalto entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"asfalto",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -237,11 +240,14 @@
                     - Manuntenção de pontos de onibus
                     - Problemas de transito (vias engarrafadas, passagens bloqueadas, etc.)
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas de transporte entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"transporte",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -249,13 +255,17 @@
             <Saude>
                 <Identificacao>
                     Demandas de saude podem incluir:
-                    - Solicitações de consultas, exames, cirurgias e medicamentos
+                    - Solicitações de consultas, exames, cirurgias e medicamentos,
+                    - Problemas com hospitais
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas de saude entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"saude",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -267,11 +277,14 @@
                     - Reclamações da qualidade de professores, das aulas, da estrutura da escola publicas
                     - Sugestoes de melhorias em escolas ou construção de novas instituições de ensino publicas
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas de educação entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"educacao",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -282,11 +295,14 @@
                     - Reforço de policiamento, rondas, instalação de bases da GCM
                     - Denuncias de crimes
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas de seguranca entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"seguranca",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -297,11 +313,14 @@
                     - Podas e supressões de arvores
                     - Manuntenção em equipamentos e espaços publicos
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas diversas entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"zeladoria",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
@@ -314,11 +333,14 @@
                     - Pedidos de doação de itens diversos
                     - Encaminhamento para vagas de emprego ou envio de currículo
                 </Identificacao>
+                Se for necessario, solicite:
+                - endereco da ocorrencia → {{enderecoOcorrencia}} (caso o contrario deixe como uma string vazia "")
                 Para demandas diversas entenda primeiro a situação do cliente e após coletar informações relevantes gere um resumo da situação e salve em {{situacaoResumida}}.
                 Execute a tool:
                 {
                     "idAcao":"registrar_ocorrencia",
                     "categoria":"outros",
+                    "enderecoOcorrencia":"{{enderecoOcorrencia}}",
                     "telefoneCliente":"{{telefoneCliente}}",
                     "situacaoResumida":"{{situacaoResumida}}"
                 }
