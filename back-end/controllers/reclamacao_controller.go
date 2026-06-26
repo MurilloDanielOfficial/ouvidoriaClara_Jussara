@@ -19,6 +19,11 @@ func NewReclamacaoController(usecase usecases.ReclamacaoUseCases) ReclamacaoCont
 	return ReclamacaoController{useCase: usecase}
 }
 
+func (ctrl ReclamacaoController) GetCategorias(c *gin.Context){
+	c.JSON(http.StatusOK, ctrl.useCase.GetCategorias())
+}
+
+
 func (ctrl ReclamacaoController) CriarReclamacao(c *gin.Context) {
 	var data models.RequestData
 	if err := c.ShouldBindJSON(&data); err != nil {

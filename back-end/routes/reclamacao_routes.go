@@ -23,4 +23,6 @@ func SetupReclamacaoRoutes(router *gin.Engine, reclamacaoController controllers.
 	router.GET("/ocorrencia/:id", reclamacaoController.GetOcorrenciaById)
 	router.PUT("/ocorrencia/:id", reclamacaoController.UpdateOcorrencia)
 	router.DELETE("/ocorrencia/:id", reclamacaoController.DeleteOcorrencia)
+
+	router.GET("/categorias", reclamacaoController.GetCategorias)
 }

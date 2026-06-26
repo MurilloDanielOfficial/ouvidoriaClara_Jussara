@@ -51,6 +51,10 @@ func normalizeTelefone(telefone string) string {
 	return somenteNumeros
 }
 
+func (uc ReclamacaoUseCases) GetCategorias()([]string){
+	return categorias
+}
+
 func (uc ReclamacaoUseCases) CreateReclamacao(data models.RequestData) error {
 	if !ehCategoria(data.Categoria) {
 		return fmt.Errorf("Categoria inválida")
