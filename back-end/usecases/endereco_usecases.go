@@ -246,3 +246,27 @@ func (uc EnderecoUseCases) CadastrarEnderecos(enderecos []models.Endereco) error
 func (uc EnderecoUseCases) GetAllEnderecos() ([]models.Logradouro, error) {
 	return uc.repository.GetAllEnderecos()
 }
+func (uc EnderecoUseCases) GetEnderecoById(id int) (*models.Logradouro, error) {
+	return uc.repository.GetEnderecoById(id)
+}
+func (uc EnderecoUseCases) UpdateEndereco(id int, req models.Logradouro) ( error) {
+	endereco, err := uc.repository.GetEnderecoById(id)
+	if err != nil {
+		return err
+	}
+	if req.Bairro != ""{
+		endereco.Bairro = req.Bairro
+	}
+	if req.Logradouro != ""{
+		endereco.Logradouro = req.Logradouro
+	}
+	if req.Regiao != ""{
+		endereco.Regiao = req.Regiao
+	}
+
+	return uc.repository.UpdateEndereco(endereco)
+}
+
+func (uc EnderecoUseCases) DeleteEndereco(id int) error {
+	return uc.repository.DeleteEndereco(id)
+}

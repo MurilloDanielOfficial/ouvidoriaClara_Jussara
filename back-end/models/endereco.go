@@ -7,6 +7,7 @@ type Endereco struct {
 }
 
 type Logradouro struct {
+	Id         int    `db:"id" json:"id"`
 	Logradouro string `db:"logradouro" json:"logradouro"`
 	Bairro     string `db:"bairro" json:"bairro"`
 	Regiao     string `db:"regiao" json:"regiao"`

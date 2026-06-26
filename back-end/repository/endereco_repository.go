@@ -24,6 +24,30 @@ func (repo EnderecoRepository) GetAllEnderecos() ([]models.Logradouro, error) {
 	return enderecos, err
 }
 
+func (repo EnderecoRepository) GetEnderecoById(id int) (*models.Logradouro, error) {
+	const query = `SELECT * FROM enderecos WHERE id = $1`
+	var endereco models.Logradouro
+	err := repo.connection.Get(&endereco, query, id)
+	return &endereco, err
+}
+
+func (repo EnderecoRepository) UpdateEndereco(endereco *models.Logradouro) error {
+	const query = `
+		UPDATE endereco SET
+			logradouro = $1,
+			bairro = $2,
+			regiao = $3
+			WHERE id = $4`
+	_, err := repo.connection.Exec(query, endereco.Logradouro, endereco.Bairro, endereco.Regiao, endereco.Id)
+	return err
+}
+
+func (repo EnderecoRepository) DeleteEndereco(id int) error {
+	const query = `DELETE FROM endereco WHERE id = $1`
+	_, err := repo.connection.Exec(query, id)
+	return err
+}
+
 func (repo EnderecoRepository) GetRegiaoByLogradouro(logradouro, bairro string) (string, error) {
 	const query = `
 		SELECT 

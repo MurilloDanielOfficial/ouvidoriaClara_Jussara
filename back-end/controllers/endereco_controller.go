@@ -4,6 +4,7 @@ import (
 	"back-end/models"
 	"back-end/usecases"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,4 +43,47 @@ func (ctrl EnderecoController) GetAllEnderecos(c *gin.Context){
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"enderecos": enderecos})
+}
+func (ctrl EnderecoController) GetEnderecoById(c *gin.Context){
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message":"id deve ser numerico", "error":err.Error()})
+		return
+	}
+	enderecos, err := ctrl.useCase.GetEnderecoById(id)
+	if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"enderecos": enderecos})
+}
+
+func (ctrl EnderecoController) UpdateEndereco(c *gin.Context){
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message":"id deve ser numerico", "error":err.Error()})
+		return
+	}
+
+	var data models.Logradouro
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Formato inválido.", "error": err.Error()})
+		return
+	}
+	if err := ctrl.useCase.UpdateEndereco(id, data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+}
+
+func (ctrl EnderecoController) DeleteEndereco(c *gin.Context){
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message":"id deve ser numerico", "error":err.Error()})
+		return
+	}
+	if err := ctrl.useCase.DeleteEndereco(id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 }
