@@ -51,7 +51,7 @@ func normalizeTelefone(telefone string) string {
 	return somenteNumeros
 }
 
-func (uc ReclamacaoUseCases) GetCategorias()([]string){
+func (uc ReclamacaoUseCases) GetCategorias() []string {
 	return categorias
 }
 
@@ -244,10 +244,11 @@ func (uc ReclamacaoUseCases) CreateOcorrencia(request models.OcorrenciaRequest) 
 		case "animal apareceu na rua", "ajuda animal comunitario", "animal desaparecido", "animal para ser adotado":
 			regiao = uc.enderecoUC.GetRegiaoPorBairro(request.BairroAnimal)
 		default: // ideia que não sei se pode valer a pena
-			if request.EnderecoOcorrencia != ""{
+			if request.EnderecoOcorrencia != "" {
 				regiao = uc.enderecoUC.GetRegiao(request.EnderecoOcorrencia)
+			} else {
+				regiao = uc.enderecoUC.GetRegiao(cliente.Endereco + "," + cliente.Bairro)
 			}
-			regiao = uc.enderecoUC.GetRegiao(cliente.Endereco + "," + cliente.Bairro)
 		}
 	}
 	data.Detalhes.Regiao = regiao
