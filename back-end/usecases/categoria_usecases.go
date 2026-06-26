@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"back-end/models"
 	"back-end/repository"
 )
 
@@ -13,6 +12,16 @@ func NewCategoriaUseCase(repo *repository.CategoriaRepo) *CategoriaUseCase {
 	return &CategoriaUseCase{repo: repo}
 }
 
-func (uc *CategoriaUseCase) GetAllCategorias() ([]models.Categoria, error){
-	return uc.repo.GetAllCategorias()
+func (uc *CategoriaUseCase) GetAllCategorias() ([]string, error) {
+	categ, err := uc.repo.GetAllCategorias()
+	if err != nil {
+		return nil, err
+	}
+
+	var categorias []string
+	for _, c := range categ {
+		categorias = append(categorias, c.Descricao)
+	}
+
+	return categorias, nil
 }
