@@ -3,7 +3,7 @@ package models
 type Endereco struct {
 	Logradouro string `json:"Logradouro"`
 	Bairro     string `json:"Bairro"`
-	Regiao     int    `json:"Região"`
+	Regiao     string    `json:"Região"`
 }
 
 type Logradouro struct {
