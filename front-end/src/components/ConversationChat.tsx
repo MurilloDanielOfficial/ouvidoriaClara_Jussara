@@ -1,16 +1,28 @@
 import * as React from 'react'
-import { Box, Typography, CircularProgress, Alert, TextField, IconButton, Chip } from '@mui/material'
-import { MessageCircle, AlertCircle, Send, Power } from 'lucide-react'
+import { Box, Typography, CircularProgress, Alert, TextField, IconButton, Chip, Button } from '@mui/material'
+import { MessageCircle, AlertCircle, Send, Power, Clock, FileText } from 'lucide-react'
 import ChatBubble from './ChatBubble'
+import ConfirmDialog from './ConfirmDialog'
 import {
   getHistoricoChat,
   enviarMensagemAgente,
+  enviarTemplateRetomada,
   getIaLigada,
   religarIa,
 } from '../services/difyService'
+import { ApiError } from '../utils/api'
 import { formatPhoneDisplay } from '../utils/phone'
 import { isNA } from '../utils/display'
-import type { ConversaResumo, MensagemChat } from '../types'
+import type { ConversaResumo, MensagemChat, JanelaAtendimento } from '../types'
+
+// "5h 12min" / "38min"
+function formatRestante(segundos: number): string {
+  const totalMin = Math.max(0, Math.floor(segundos / 60))
+  const h = Math.floor(totalMin / 60)
+  const m = totalMin % 60
+  if (h === 0) return `${m}min`
+  return m === 0 ? `${h}h` : `${h}h ${m}min`
+}
 
 interface ConversationChatProps {
   conversa: ConversaResumo | null
@@ -28,6 +40,10 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
   const [sending, setSending] = React.useState(false)
   const [iaLigada, setIaLigada] = React.useState<boolean | null>(null)
   const [togglingIa, setTogglingIa] = React.useState(false)
+  const [janela, setJanela] = React.useState<JanelaAtendimento | null>(null)
+  const [sendError, setSendError] = React.useState<string | null>(null)
+  const [confirmTemplate, setConfirmTemplate] = React.useState(false)
+  const [sendingTemplate, setSendingTemplate] = React.useState(false)
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const abortRef = React.useRef<AbortController | null>(null)
 
@@ -37,8 +53,12 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
       setMessages([])
       setError(null)
       setIaLigada(null)
+      setJanela(null)
       return
     }
+    setJanela(null)
+    setSendError(null)
+    setInputValue('')
 
     let cancelled = false
     let pollTimer: ReturnType<typeof setTimeout> | null = null
@@ -54,6 +74,7 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
         const data = await getHistoricoChat(conversa.telefone, controller.signal)
         if (cancelled) return
         setMessages(data.mensagens || [])
+        setJanela(data.janela ?? null)
         setError(null)
       } catch (err) {
         if (cancelled || (err as Error).name === 'AbortError') return
@@ -126,6 +147,7 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
     if (!conteudo || !conversa || sending) return
 
     setSending(true)
+    setSendError(null)
     try {
       const novaMensagem = await enviarMensagemAgente(conversa.telefone, conteudo)
       // Adiciona a mensagem otimisticamente na lista
@@ -143,11 +165,43 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
       }, 50)
     } catch (err) {
       console.error('Erro ao enviar mensagem:', err)
-      setError('Erro ao enviar mensagem: ' + (err as Error).message)
+      if (err instanceof ApiError && err.status === 409) {
+        // janela fechou entre o último polling e o envio: o texto fica no campo
+        setJanela({ aberta: false, segundosRestantes: 0 })
+      } else {
+        setSendError('Não foi possível enviar: ' + (err as Error).message)
+      }
     } finally {
       setSending(false)
     }
   }
+
+  // Enviar a mensagem modelo (janela de 24h fechada)
+  const handleSendTemplate = async () => {
+    setConfirmTemplate(false)
+    if (!conversa || sendingTemplate) return
+    setSendingTemplate(true)
+    setSendError(null)
+    try {
+      const novaMensagem = await enviarTemplateRetomada(conversa.telefone)
+      setMessages((prev) => [...prev, novaMensagem])
+      setIaLigada(false)
+      onMessageSent?.()
+      setTimeout(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      }, 50)
+    } catch (err) {
+      console.error('Erro ao enviar mensagem modelo:', err)
+      setSendError('Não foi possível enviar a mensagem modelo: ' + (err as Error).message)
+    } finally {
+      setSendingTemplate(false)
+    }
+  }
+
+  // Modelo já enviado e o cidadão ainda não respondeu?
+  const ultimaMsg = messages[messages.length - 1]
+  const aguardandoResposta =
+    !!ultimaMsg && ultimaMsg.remetente === 'agente' && ultimaMsg.conteudo.startsWith('📋')
 
   // Religar a IA
   const handleReligarIa = async () => {
@@ -246,17 +300,73 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
         </Box>
       </Box>
 
-      {/* Input de mensagem — oculto (mensagens são gerenciadas via WhatsApp/back-end) */}
-      {false && (
+      {sendError && (
+        <Alert
+          severity="error"
+          onClose={() => setSendError(null)}
+          sx={{ borderRadius: 0, flexShrink: 0, fontSize: 13 }}
+        >
+          {sendError}
+        </Alert>
+      )}
+
+      {/* Janela de 24h fechada: só mensagem modelo (regra da Meta) */}
+      {janela && !janela.aberta ? (
+        <Box
+          sx={{
+            p: 1.5,
+            borderTop: '1px solid hsl(var(--border))',
+            bgcolor: 'hsl(var(--surface))',
+            display: 'flex',
+            gap: 1.5,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            flexShrink: 0,
+          }}
+        >
+          <Clock size={18} color="hsl(var(--warning))" style={{ flexShrink: 0 }} />
+          <Box sx={{ flex: 1, minWidth: 220 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'hsl(var(--text-primary))' }}>
+              {aguardandoResposta ? 'Mensagem modelo enviada' : 'Janela de 24h fechada'}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: 'hsl(var(--text-secondary))', lineHeight: 1.4 }}>
+              {aguardandoResposta
+                ? 'Assim que o cidadão responder, o campo de texto volta a funcionar.'
+                : 'O cidadão não fala com a gente há mais de 24h. Pelas regras do WhatsApp, só dá para enviar a mensagem modelo aprovada. Quando ele responder, a conversa reabre.'}
+            </Typography>
+          </Box>
+          {!aguardandoResposta && (
+            <Button
+              variant="contained"
+              size="small"
+              disabled={sendingTemplate}
+              onClick={() => setConfirmTemplate(true)}
+              startIcon={sendingTemplate ? <CircularProgress size={14} /> : <FileText size={16} />}
+              sx={{
+                bgcolor: 'hsl(var(--accent))',
+                '&:hover': { bgcolor: 'hsl(var(--accent-hover))' },
+                textTransform: 'none',
+                fontWeight: 600,
+                borderRadius: 2,
+              }}
+            >
+              Enviar mensagem modelo
+            </Button>
+          )}
+        </Box>
+      ) : (
+      <Box sx={{ flexShrink: 0, borderTop: '1px solid hsl(var(--border))', bgcolor: 'hsl(var(--surface))' }}>
+      {janela?.aberta && (
+        <Typography sx={{ px: 1.75, pt: 1, fontSize: 12, color: 'hsl(var(--text-secondary))' }}>
+          Janela aberta · fecha em {formatRestante(janela.segundosRestantes)} · enviar desliga a Ju nesta conversa
+        </Typography>
+      )}
       <Box
         sx={{
           p: 1.5,
-          borderTop: '1px solid hsl(var(--border))',
-          bgcolor: 'hsl(var(--surface))',
           display: 'flex',
           gap: 1,
           alignItems: 'flex-end',
-          flexShrink: 0,
         }}
       >
         <TextField
@@ -299,7 +409,17 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
           {sending ? <CircularProgress size={18} /> : <Send size={18} />}
         </IconButton>
       </Box>
+      </Box>
       )}
+
+      <ConfirmDialog
+        open={confirmTemplate}
+        title="Enviar mensagem modelo?"
+        message="O WhatsApp cobra por mensagem modelo enviada fora da janela de 24h. Ela convida o cidadão a responder; quando ele responder, você volta a conversar normalmente. A Ju fica desligada nesta conversa."
+        confirmLabel="Enviar"
+        onConfirm={handleSendTemplate}
+        onCancel={() => setConfirmTemplate(false)}
+      />
     </Box>
   )
 }

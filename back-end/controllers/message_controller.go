@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"back-end/models"
+	"back-end/services"
 	"back-end/usecases"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -80,7 +82,29 @@ func (ctrl *MensagemController) AddMensagemAgente(c *gin.Context) {
 	body.Print()
 	historico, err := ctrl.usecase.EnviarMensagemAgente(body.Telefone, body.Conteudo)
 	if err != nil {
+		if errors.Is(err, services.ErrJanelaFechada) {
+			c.JSON(http.StatusConflict, gin.H{
+				"error":  "A janela de 24h está fechada. O WhatsApp só permite enviar a mensagem modelo aprovada.",
+				"codigo": "JANELA_FECHADA",
+			})
+			return
+		}
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Erro ao enviar mensagem do agente: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, historico)
+}
+
+// EnviarTemplateAgente manda a mensagem modelo de retomada (usada com a janela de 24h fechada).
+func (ctrl *MensagemController) EnviarTemplateAgente(c *gin.Context) {
+	var body models.EnviarTemplateAgente
+	if err := c.ShouldBindJSON(&body); err != nil || strings.TrimSpace(body.Telefone) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Telefone não informado"})
+		return
+	}
+	historico, err := ctrl.usecase.EnviarTemplateRetomada(body.Telefone)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, historico)

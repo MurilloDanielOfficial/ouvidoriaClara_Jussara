@@ -102,6 +102,17 @@ type HistoricoChatResponse struct {
 	Telefone  string              `json:"telefone"`
 	Nome      string              `json:"nome"`
 	Mensagens []MensagemHistorico `json:"mensagens"`
+	Janela    JanelaAtendimento   `json:"janela"`
+}
+
+// JanelaAtendimento é a janela de 24h da Meta: aberta = pode mandar texto livre.
+type JanelaAtendimento struct {
+	Aberta            bool  `json:"aberta"`
+	SegundosRestantes int64 `json:"segundosRestantes"`
+}
+
+type EnviarTemplateAgente struct {
+	Telefone string `json:"telefone"`
 }
 
 type ConversaResumo struct {

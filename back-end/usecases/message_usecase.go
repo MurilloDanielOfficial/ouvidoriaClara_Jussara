@@ -4,6 +4,7 @@ import (
 	"back-end/config"
 	"back-end/models"
 	"back-end/repository"
+	"back-end/services"
 	"back-end/utils"
 	"database/sql"
 	"errors"
@@ -343,18 +344,42 @@ func (u *MensagemUseCase) SalvarMensagemIA(telefone, conteudo string) error {
 	})
 }
 
-// EnviarMensagemAgente desliga a IA, envia a mensagem do atendente humano e registra no histórico
+// margem de segurança: a janela é tratada como fechada 10 min antes das 24h
+const margemJanelaMinutos = 10
+
+// GetJanela informa se a janela de 24h da Meta está aberta para o contato.
+func (u *MensagemUseCase) GetJanela(telefone string) (models.JanelaAtendimento, error) {
+	segundos, err := u.repo.GetSegundosRestantesJanela(telefone, margemJanelaMinutos)
+	if err != nil {
+		return models.JanelaAtendimento{}, err
+	}
+	if segundos < 0 {
+		segundos = 0
+	}
+	return models.JanelaAtendimento{Aberta: segundos > 0, SegundosRestantes: segundos}, nil
+}
+
+// EnviarMensagemAgente desliga a IA, envia texto livre pela API Oficial e registra no histórico.
+// Fora da janela de 24h devolve services.ErrJanelaFechada (o front oferece o envio do modelo).
 func (u *MensagemUseCase) EnviarMensagemAgente(telefone, conteudo string) (*models.HistoricoChat, error) {
 	conteudo = strings.TrimSpace(conteudo)
 	if conteudo == "" {
 		return nil, fmt.Errorf("conteudo vazio")
 	}
 
+	janela, err := u.GetJanela(telefone)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao verificar janela de 24h: %w", err)
+	}
+	if !janela.Aberta {
+		return nil, services.ErrJanelaFechada
+	}
+
 	if err := u.repo.SetClienteBloqueado(telefone); err != nil {
 		return nil, fmt.Errorf("erro ao desligar a IA: %w", err)
 	}
 
-	if err := config.EnviarMensagem(u.padronizaTelefone(telefone), conteudo, "Mensagem Humano"); err != nil {
+	if _, err := services.EnviarTextoMeta(telefone, conteudo); err != nil {
 		return nil, fmt.Errorf("erro ao enviar mensagem: %w", err)
 	}
 
@@ -362,6 +387,73 @@ func (u *MensagemUseCase) EnviarMensagemAgente(telefone, conteudo string) (*mode
 		Telefone:  telefone,
 		Remetente: "agente",
 		Conteudo:  conteudo,
+		Tipo:      "texto",
+	}
+	if err := u.repo.CreateHistoricoChat(historico); err != nil {
+		return nil, err
+	}
+	historico.CriadoEm = comHorarioLocal(historico.CriadoEm)
+	return historico, nil
+}
+
+// textoRetomadaPadrao é usado quando META_TEMPLATE_RETOMADA_TEXTO não está no .env.
+const textoRetomadaPadrao = "Olá, {{1}}! Aqui é da equipe da Ouvidoria do gabinete da vereadora Jussara Fernandes. Temos um retorno sobre o seu atendimento. Pode responder esta mensagem para continuarmos?"
+
+// EnviarTemplateRetomada manda a mensagem modelo que convida o cidadão a responder.
+// Quando ele responde, a janela de 24h abre e o assessor volta a usar o campo de texto.
+//
+// Dois modos, conforme o .env:
+//   - Sem WEBHOOK_META_ENVIAR (n8n atual, sem alterar): o texto de retomada vai dentro
+//     do modelo template_utility pelo webhook WEBHOOK_ENVIAR_MENSAGEM.
+//   - Com WEBHOOK_META_ENVIAR: envia o modelo próprio META_TEMPLATE_RETOMADA
+//     (idioma META_TEMPLATE_RETOMADA_IDIOMA, {{1}} = primeiro nome se META_TEMPLATE_RETOMADA_NOME=true).
+//
+// META_TEMPLATE_RETOMADA_TEXTO é o texto de retomada ({{1}} vira o primeiro nome).
+func (u *MensagemUseCase) EnviarTemplateRetomada(telefone string) (*models.HistoricoChat, error) {
+	primeiroNome := "tudo bem"
+	if contato, err := u.repo.GetContatoByTelefone(telefone); err == nil && contato != nil && contato.Nome != nil {
+		if campos := strings.Fields(*contato.Nome); len(campos) > 0 && campos[0] != "?" {
+			primeiroNome = campos[0]
+		}
+	}
+
+	texto := strings.TrimSpace(os.Getenv("META_TEMPLATE_RETOMADA_TEXTO"))
+	if texto == "" {
+		texto = textoRetomadaPadrao
+	}
+	texto = strings.ReplaceAll(texto, "{{1}}", primeiroNome)
+
+	// desliga a IA: quem chamou foi o assessor, a resposta do cidadão é para ele
+	if err := u.repo.SetClienteBloqueado(telefone); err != nil {
+		return nil, fmt.Errorf("erro ao desligar a IA: %w", err)
+	}
+
+	if services.UsaN8NAtual() {
+		if _, err := services.EnviarTextoMeta(telefone, texto); err != nil {
+			return nil, fmt.Errorf("erro ao enviar mensagem modelo: %w", err)
+		}
+	} else {
+		nomeTemplate := strings.TrimSpace(os.Getenv("META_TEMPLATE_RETOMADA"))
+		if nomeTemplate == "" {
+			return nil, fmt.Errorf("META_TEMPLATE_RETOMADA não configurado no .env")
+		}
+		idioma := strings.TrimSpace(os.Getenv("META_TEMPLATE_RETOMADA_IDIOMA"))
+		if idioma == "" {
+			idioma = "pt_BR"
+		}
+		var params []string
+		if strings.EqualFold(strings.TrimSpace(os.Getenv("META_TEMPLATE_RETOMADA_NOME")), "true") {
+			params = []string{primeiroNome}
+		}
+		if _, err := services.EnviarTemplateMeta(telefone, nomeTemplate, idioma, params); err != nil {
+			return nil, fmt.Errorf("erro ao enviar mensagem modelo: %w", err)
+		}
+	}
+
+	historico := &models.HistoricoChat{
+		Telefone:  telefone,
+		Remetente: "agente",
+		Conteudo:  "📋 " + texto,
 		Tipo:      "texto",
 	}
 	if err := u.repo.CreateHistoricoChat(historico); err != nil {
@@ -407,10 +499,15 @@ func (u *MensagemUseCase) GetHistoricoChat(telefone string) (*models.HistoricoCh
 			CriadoEm:  comHorarioLocal(h.CriadoEm),
 		})
 	}
+	janela, err := u.GetJanela(telefone)
+	if err != nil {
+		fmt.Println("Erro ao calcular janela de 24h: ", err)
+	}
 	return &models.HistoricoChatResponse{
 		Telefone:  telefone,
 		Nome:      nome,
 		Mensagens: mensagens,
+		Janela:    janela,
 	}, nil
 }
 

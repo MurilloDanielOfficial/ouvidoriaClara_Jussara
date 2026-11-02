@@ -102,6 +102,23 @@ func (r *MensagemRepo) GetHistoricoByTelefone(telefone string) ([]models.Histori
 	return historico, err
 }
 
+// GetSegundosRestantesJanela devolve quantos segundos faltam para fechar a janela de 24h
+// (contada da última mensagem do cidadão). Valor <= 0 significa janela fechada.
+// O cálculo é feito no próprio Postgres para não sofrer com fuso horário.
+// margemMinutos antecipa o fechamento (a mensagem é gravada alguns segundos depois de chegar na Meta).
+func (r *MensagemRepo) GetSegundosRestantesJanela(telefone string, margemMinutos int) (int64, error) {
+	const query = `
+		SELECT COALESCE(
+			FLOOR(EXTRACT(EPOCH FROM (MAX(criado_em) + INTERVAL '24 hours' - make_interval(mins => $2) - LOCALTIMESTAMP))),
+			0
+		)::BIGINT
+		FROM historico_chat
+		WHERE telefone = $1 AND remetente = 'cliente'`
+	var segundos int64
+	err := r.db.Get(&segundos, query, telefone, margemMinutos)
+	return segundos, err
+}
+
 func (r *MensagemRepo) SetClienteBloqueado(telefone string) error {
 	const query = `INSERT INTO clientesbloqueados (idcliente) VALUES ($1) ON CONFLICT DO NOTHING`
 	_, err := r.db.Exec(query, telefone)

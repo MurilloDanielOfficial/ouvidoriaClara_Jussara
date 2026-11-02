@@ -44,6 +44,14 @@ export async function enviarMensagemAgente(
 }
 
 /**
+ * Envia a mensagem modelo aprovada na Meta (usada com a janela de 24h fechada).
+ * Quando o cidadão responder, a janela reabre e o texto livre volta a funcionar.
+ */
+export async function enviarTemplateRetomada(telefone: string): Promise<MensagemChat> {
+  return apiPost<MensagemChat>('/chat/template-agente', { telefone })
+}
+
+/**
  * Verifica se a IA está ligada para o contato.
  * Retorna true (ligada) ou false (desligada).
  * O backend retorna texto plano "true"/"false".

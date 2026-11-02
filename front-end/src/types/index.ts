@@ -298,10 +298,17 @@ export interface MensagemChat {
   criadoEm: string
 }
 
+// Janela de 24h da Meta: aberta = texto livre; fechada = só mensagem modelo
+export interface JanelaAtendimento {
+  aberta: boolean
+  segundosRestantes: number
+}
+
 export interface HistoricoChatResponse {
   telefone: string
   nome: string
   mensagens: MensagemChat[]
+  janela?: JanelaAtendimento
 }
 
 export interface ConversaResumo {
