@@ -18,12 +18,21 @@
   --error: 0 53% 55%;
   --warning: 35 66% 62%;
   --info: 210 68% 56%;
+  /* Variantes claras para TEXTO pequeno no dark: --error/--info sozinhos dão
+     3.4:1 e 4.4:1 sobre --surface (abaixo do 4.5:1 do WCAG AA). Estas passam. */
+  --error-text: 0 60% 70%;
+  --info-text: 210 75% 68%;
   --app-bg: hsl(var(--background));
   /* Chat — fundo da área de mensagens e bolha do cliente (precisam de contraste entre si) */
   --chat-bg: 222 16% 12%;
   --bubble-client: 222 15% 18%;
   /* Scrollbar thumb — branco suave no dark (contraste ~13:1 sobre o fundo, WCAG 2.2 SC 1.4.11) */
   --scrollbar-thumb: 0 0% 90%;
+  /* Motion tokens — easing e durações oficiais da marca */
+  --ease-brand: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 150ms;
+  --dur-normal: 200ms;
+  --dur-slow: 350ms;
 }
 
 html.theme-light,
@@ -43,6 +52,9 @@ body.theme-light {
   --error: 0 50% 47%;
   --warning: 35 62% 54%;
   --info: 210 62% 48%;
+  /* No light os tokens base já passam de 4.5:1 sobre superfície branca. */
+  --error-text: 0 50% 47%;
+  --info-text: 210 62% 48%;
   --app-bg: hsl(var(--background));
   /* Chat — fundo levemente cinza (93%) para a bolha branca (100%) ter contraste visível,
      como no WhatsApp onde o fundo é beje e a bolha do cliente é branca */
@@ -202,4 +214,49 @@ body.theme-light .login-logo-circle {
 
 body.theme-light ::-webkit-calendar-picker-indicator {
   filter: none;
+}
+
+/* ── Dashboard / Estatísticas ────────────────────── */
+/* Entrada de cards: position + opacity (nunca opacity-only). Fill "backwards"
+   para o keyframe não segurar o transform final e preservar o translateY do hover. */
+@keyframes stat-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stat-enter {
+  animation: stat-enter var(--dur-slow) var(--ease-brand) backwards;
+}
+
+/* Card de métrica: border/sombra moram aqui (GlassPanel com noBorder) para o
+   hover poder acender a borda com a cor do card via --card-accent. */
+.stat-card {
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    transform var(--dur-fast) var(--ease-brand),
+    box-shadow var(--dur-normal) var(--ease-brand),
+    border-color var(--dur-fast) var(--ease-brand);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--card-accent, hsl(var(--accent))) 45%, hsl(var(--border)));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .stat-card:hover {
+  box-shadow: 0 10px 24px rgba(30, 87, 194, 0.12), 0 2px 6px rgba(30, 87, 194, 0.06);
+}
+
+/* Seta dos CTAs de ação ("tratar agora →") — nudge horizontal contínuo e
+   discreto que sinaliza direção/ação sem poluir a leitura. */
+@keyframes nudge-x {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(3px); }
+}
+
+.nudge-arrow {
+  display: inline-block;
+  animation: nudge-x 1.6s var(--ease-brand) infinite;
 }

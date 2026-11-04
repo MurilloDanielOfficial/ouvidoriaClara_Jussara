@@ -47,9 +47,14 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const abortRef = React.useRef<AbortController | null>(null)
 
-  // Carrega mensagens + status da IA quando a conversa muda + polling
+  // Carrega mensagens + status da IA quando a conversa muda + polling.
+  // A dep é o TELEFONE (estável), não o objeto `conversa`: a ConversasPage
+  // recria a lista a cada poll de 15s (array/objetos novos), e com o objeto
+  // na dep o efeito re-rodava → setJanela(null) → o input aparecia por um
+  // instante mesmo com a janela fechada (flicker do rodapé a cada 15s).
+  const tel = conversa?.telefone
   React.useEffect(() => {
-    if (!conversa || !conversa.telefone) {
+    if (!tel) {
       setMessages([])
       setError(null)
       setIaLigada(null)
@@ -71,7 +76,7 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
       abortRef.current = controller
 
       try {
-        const data = await getHistoricoChat(conversa.telefone, controller.signal)
+        const data = await getHistoricoChat(tel, controller.signal)
         if (cancelled) return
         setMessages(data.mensagens || [])
         setJanela(data.janela ?? null)
@@ -86,7 +91,7 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
 
     const loadIaStatus = async () => {
       try {
-        const ligada = await getIaLigada(conversa.telefone)
+        const ligada = await getIaLigada(tel)
         if (cancelled) return
         setIaLigada(ligada)
       } catch {
@@ -113,7 +118,7 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
       if (pollTimer) clearTimeout(pollTimer)
       if (abortRef.current) abortRef.current.abort()
     }
-  }, [conversa])
+  }, [tel])
 
   // Auto-scroll para o final quando mensagens chegam
   const prevMsgCountRef = React.useRef(0)
@@ -310,8 +315,20 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
         </Alert>
       )}
 
-      {/* Janela de 24h fechada: só mensagem modelo (regra da Meta) */}
-      {janela && !janela.aberta ? (
+      {/* Janela de 24h fechada: só mensagem modelo (regra da Meta).
+          janela === null = estado ainda desconhecido para ESTA conversa (fetch
+          não respondeu): só reserva o espaço do rodapé — mostrar o input aqui
+          faria ele aparecer e ser trocado pelo aviso (flicker). */}
+      {janela === null ? (
+        <Box
+          sx={{
+            flexShrink: 0,
+            borderTop: '1px solid hsl(var(--border))',
+            bgcolor: 'hsl(var(--surface))',
+            minHeight: 66,
+          }}
+        />
+      ) : !janela.aberta ? (
         <Box
           sx={{
             p: 1.5,
@@ -322,10 +339,11 @@ const ConversationChat: React.FC<ConversationChatProps> = ({ conversa, onMessage
             alignItems: 'center',
             flexWrap: 'wrap',
             flexShrink: 0,
+            flexDirection: { xs: 'column', sm: 'row' },
           }}
         >
           <Clock size={18} color="hsl(var(--warning))" style={{ flexShrink: 0 }} />
-          <Box sx={{ flex: 1, minWidth: 220 }}>
+          <Box sx={{ flex: 1, minWidth: 220, textAlign: { xs: 'center', sm: 'left' } }}>
             <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'hsl(var(--text-primary))' }}>
               {aguardandoResposta ? 'Mensagem modelo enviada' : 'Janela de 24h fechada'}
             </Typography>

@@ -14,18 +14,20 @@ import {
   MapPin,
   MessageCircle,
   User,
+  BarChart3,
 } from 'lucide-react'
 import { getTheme, toggleTheme } from '../utils/theme'
 import { clearSession, getSession } from '../utils/session'
 import type { Theme } from '../utils/theme'
 
 const navItems = [
-  { to: '/', icon: FileText, label: 'Solicitações' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Visão Geral', adminOnly: true },
+  { to: '/solicitacoes', icon: FileText, label: 'Solicitações' },
   { to: '/contatos', icon: Phone, label: 'Contatos' },
   { to: '/liderancas', icon: Megaphone, label: 'Lideranças' },
   { to: '/enderecos', icon: MapPin, label: 'Endereços' },
   { to: '/conversas', icon: MessageCircle, label: 'Conversas' },
-  { to: '/estatisticas', icon: LayoutDashboard, label: 'Estatísticas' },
+  { to: '/estatisticas', icon: BarChart3, label: 'Estatísticas' },
 ]
 
 const NAVBAR_HEIGHT = 64
@@ -36,6 +38,7 @@ const Navbar: React.FC = () => {
   const [theme, setThemeState] = useState<Theme>(getTheme())
   const [mobileOpen, setMobileOpen] = useState(false)
   const session = getSession()
+  const items = navItems.filter((i) => !i.adminOnly || session?.root)
 
   useEffect(() => {
     const body = document.body
@@ -134,7 +137,7 @@ const Navbar: React.FC = () => {
           left: '50%',
           transform: 'translateX(-50%)',
         }} className="navbar-links-desktop">
-          {navItems.map((item) => {
+          {items.map((item) => {
             const active = location.pathname === item.to
             return (
               <Link
@@ -311,7 +314,7 @@ const Navbar: React.FC = () => {
           fontFamily: "'Inter', sans-serif",
           overflowY: 'auto',
         }}>
-          {navItems.map((item) => {
+          {items.map((item) => {
             const active = location.pathname === item.to
             return (
               <Link

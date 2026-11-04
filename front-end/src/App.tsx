@@ -11,7 +11,8 @@ const ContatosPage = lazy(() => import('./pages/ContatosPage'))
 const CampanhasPage = lazy(() => import('./pages/CampanhasPage'))
 const EnderecosPage = lazy(() => import('./pages/EnderecosPage'))
 const ConversasPage = lazy(() => import('./pages/ConversasPage'))
-import { isSessionValid } from './utils/session'
+const PainelMesPage = lazy(() => import('./pages/PainelMesPage'))
+import { getSession, isSessionValid } from './utils/session'
 import { getTheme } from './utils/theme'
 import type { Theme } from './utils/theme'
 
@@ -56,6 +57,15 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return auth ? <>{children}</> : <Navigate to="/login" replace />
 }
 
+/* Entrada: admin cai no painel, operador cai nas solicitações. */
+function HomeRedirect() {
+  return <Navigate to={getSession()?.root ? '/dashboard' : '/solicitacoes'} replace />
+}
+
+function RequireRoot({ children }: { children: React.ReactNode }) {
+  return getSession()?.root ? <>{children}</> : <Navigate to="/solicitacoes" replace />
+}
+
 function App() {
   const location = useLocation()
   const isLogin = location.pathname === '/login'
@@ -83,7 +93,9 @@ function App() {
       <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}><CircularProgress /></Box>}>
       <Routes location={location}>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<RequireAuth><ReclamacoesPage /></RequireAuth>} />
+        <Route path="/" element={<RequireAuth><HomeRedirect /></RequireAuth>} />
+        <Route path="/solicitacoes" element={<RequireAuth><ReclamacoesPage /></RequireAuth>} />
+        <Route path="/dashboard" element={<RequireAuth><RequireRoot><PainelMesPage /></RequireRoot></RequireAuth>} />
         <Route path="/estatisticas" element={<RequireAuth><DashboardPage /></RequireAuth>} />
         <Route path="/contatos" element={<RequireAuth><ContatosPage /></RequireAuth>} />
         <Route path="/liderancas" element={<RequireAuth><CampanhasPage /></RequireAuth>} />

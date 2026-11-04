@@ -12,8 +12,9 @@ export async function fetchCategorias(): Promise<string[]> {
 
 export function formatCategoryName(cat: string): string {
   if (isNA(cat)) return 'Não Informado'
-  if (categoryDisplayName[cat]) return categoryDisplayName[cat]
-  return cat.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  const key = (cat || '').trim().toLowerCase()
+  if (categoryDisplayName[key]) return categoryDisplayName[key]
+  return cat.trim().split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
 export const categoryDisplayName: Record<string, string> = {

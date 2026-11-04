@@ -83,6 +83,35 @@ export async function getAllContatosUnificados(
   }
 }
 
+/* Busca a base INTEIRA de contatos unificados em páginas paralelas.
+   getAllContatosUnificados(0, 0) sem LIMIT serializa a base toda num único
+   request — com ~90 mil contatos isso leva quase 1 minuto e ~30 MB. Paginar
+   em blocos de 10 mil com 4 requisições concorrentes cai para ~10 s. */
+const CONTATOS_PAGINA = 10_000
+const CONTATOS_CONCORRENCIA = 4
+
+export async function getTodosContatosUnificados(): Promise<{
+  contatos: ContatoUnificado[]
+  total: number
+  usados: number
+  ocupacao: string
+  limite: number
+}> {
+  const primeira = await getAllContatosUnificados(CONTATOS_PAGINA, 0)
+  const paginas = Math.ceil(Math.max(0, primeira.total - primeira.contatos.length) / CONTATOS_PAGINA)
+  if (paginas === 0) return primeira
+  const resto: ContatoUnificado[] = []
+  for (let i = 0; i < paginas; i += CONTATOS_CONCORRENCIA) {
+    const lote = await Promise.all(
+      Array.from({ length: Math.min(CONTATOS_CONCORRENCIA, paginas - i) }, (_, j) =>
+        getAllContatosUnificados(CONTATOS_PAGINA, (i + j + 1) * CONTATOS_PAGINA),
+      ),
+    )
+    for (const r of lote) resto.push(...r.contatos)
+  }
+  return { ...primeira, contatos: [...primeira.contatos, ...resto] }
+}
+
 export async function ativarLead(telefone: string): Promise<void> {
   await apiPut<void>(`/leads/ativar/${telefone}`, {})
 }

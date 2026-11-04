@@ -17,8 +17,7 @@ export const formatDate = (value: string | Date | null | undefined): string => {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-export const formatRelativeTime = (value: string | Date | null | undefined): string => {
-  if (!value) return ''
+export const formatRelativeTime = (value: string | Date | null | undefined): string => {  if (!value) return ''
   const d = toUTCDate(value)
   if (isNaN(d.getTime())) return ''
   const now = new Date()

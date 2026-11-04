@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { Typography, Box, TextField, Button, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Backdrop, Portal, useMediaQuery, useTheme } from '@mui/material'
-import { FileText, FileDown, Users, TrendingUp, TrendingDown, BarChart3, XCircle, Inbox, Heart, UserCheck } from 'lucide-react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Typography, Box, TextField, Button, useMediaQuery, useTheme } from '@mui/material'
+import { FileText, Users, TrendingUp, TrendingDown, BarChart3, XCircle, Inbox, Heart, UserCheck } from 'lucide-react'
 import GlassPanel from '../components/GlassPanel'
 import PageHeader from '../components/PageHeader'
 import { inputSx } from '../utils/inputSx'
@@ -9,9 +9,8 @@ import { getStats } from '../services/statsService'
 import { getAllOcorrencias } from '../services/reclamacaoService'
 import { getAllContatosUnificados } from '../services/contatoUnificadoService'
 import { listConversas } from '../services/difyService'
-import { computeRelatorioData, computeChatPhones, buildRelatorioPdf, relatorioFileName, loadLogoDataUrl } from '../utils/exportRelatorioPdf'
+import { computeChatPhones } from '../utils/exportRelatorioPdf'
 import { toUTCDate } from '../utils/date'
-import { getSession } from '../utils/session'
 import DistributionViewer from '../components/DistributionViewer'
 import PageLoader from '../components/PageLoader'
 import type { Stat, Ocorrencia, ConversaResumo } from '../types'
@@ -86,17 +85,6 @@ const DashboardPage: React.FC = () => {
   const [error, setError] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  const [exporting, setExporting] = useState(false)
-  const [exportError, setExportError] = useState('')
-  const [pdfPreview, setPdfPreview] = useState<{ url: string; fileName: string } | null>(null)
-  const cancelExportRef = useRef(false)
-  const isAdmin = getSession()?.root ?? false
-  // Safari/iOS não renderiza PDFs em iframe (todo browser iOS é WebKit) —
-  // nesse caso o preview abre o blob em nova aba via link normal.
-  const isIOS = useMemo(() =>
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
-  [])
 
   // Carga inicial: stats sem filtro + todas as ocorrências (para Kanban cards e
   // DistributionViewer) + conversas (para "Pessoas Atendidas" = total de
@@ -158,14 +146,6 @@ const DashboardPage: React.FC = () => {
       setPrevStats(null)
     }
   }, [startDate, endDate, fetchFilteredStats])
-
-  // Trava o scroll da página enquanto o overlay de geração está ativo
-  useEffect(() => {
-    if (!exporting) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [exporting])
 
   const dateRange = useMemo(() => {
     const start = startDate ? new Date(`${startDate}T00:00:00`) : null
@@ -276,67 +256,9 @@ const DashboardPage: React.FC = () => {
     )
   }
 
-  const handleExportRelatorio = async () => {
-    if (!stats || exporting) return
-    cancelExportRef.current = false
-    setExporting(true)
-    setExportError('')
-    try {
-      const [{ contatos }, conversas, logoDataUrl] = await Promise.all([
-        getAllContatosUnificados(0, 0),
-        listConversas(),
-        loadLogoDataUrl(),
-      ])
-      if (cancelExportRef.current) return
-      const data = computeRelatorioData(filteredOcorrencias, contatos, conversas, startDate || undefined, endDate || undefined)
-      const doc = buildRelatorioPdf(data, logoDataUrl)
-      const url = URL.createObjectURL(doc.output('blob'))
-      setPdfPreview((prev) => {
-        if (prev) URL.revokeObjectURL(prev.url)
-        return { url, fileName: relatorioFileName() }
-      })
-    } catch {
-      setExportError('Não foi possível gerar o relatório. Tente novamente.')
-    } finally {
-      setExporting(false)
-    }
-  }
-
-  const closePdfPreview = () => {
-    if (pdfPreview) URL.revokeObjectURL(pdfPreview.url)
-    setPdfPreview(null)
-  }
-
-  const handleCancelExport = () => {
-    cancelExportRef.current = true
-    setExporting(false)
-  }
-
   return (
     <Box className="page-root">
-      <PageHeader
-        title="Estatísticas"
-        action={isAdmin ? (
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleExportRelatorio}
-            disabled={exporting || !stats}
-            startIcon={exporting ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : <FileDown size={16} />}
-            sx={{
-              bgcolor: 'hsl(var(--primary))',
-              textTransform: 'none',
-              borderRadius: 2,
-              fontWeight: 600,
-              fontSize: 13,
-              '&:hover': { bgcolor: 'hsl(var(--primary-hover))' },
-              '&.Mui-disabled': { bgcolor: 'hsl(var(--primary) / 0.5)', color: '#fff' },
-            }}
-          >
-            {exporting ? 'Gerando…' : 'Gerar Relatório'}
-          </Button>
-        ) : undefined}
-      />
+      <PageHeader title="Estatísticas" />
       <Box
         sx={{
           display: 'flex',
@@ -378,11 +300,6 @@ const DashboardPage: React.FC = () => {
         >
           Limpar Filtros
         </Button>
-        {exportError && (
-          <Typography sx={{ color: 'hsl(var(--error))', fontSize: 12, width: '100%', textAlign: 'center' }}>
-            {exportError}
-          </Typography>
-        )}
       </Box>
       {/* Cards por coluna do Kanban (7 colunas, agrupados em 3 colunas visuais) */}
       <Box sx={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 2, mb: 2.5, alignItems: 'stretch' }}>
@@ -424,87 +341,6 @@ const DashboardPage: React.FC = () => {
           />
         </Box>
       )}
-
-      <Dialog
-        open={!!pdfPreview}
-        onClose={closePdfPreview}
-        fullScreen
-        PaperProps={{ sx: { bgcolor: 'hsl(var(--surface))', color: 'hsl(var(--text-primary))' } }}
-      >
-        <DialogTitle sx={{ color: 'hsl(var(--accent))', fontWeight: 700, fontSize: 15, py: 1, px: 2 }}>
-          Relatório · Ouvidoria Jussara
-        </DialogTitle>
-        <DialogContent sx={{ p: 0, display: 'flex', bgcolor: 'hsl(var(--surface-2))' }}>
-          {pdfPreview && (isIOS ? (
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, p: 3 }}>
-              <FileText size={40} color="hsl(var(--accent))" />
-              <Typography sx={{ color: 'hsl(var(--text-secondary))', fontSize: 13, textAlign: 'center' }}>
-                O iOS não exibe PDF aqui dentro. Abra o relatório em uma nova aba:
-              </Typography>
-              <Button
-                variant="contained"
-                component="a"
-                href={pdfPreview.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                startIcon={<FileText size={16} />}
-                sx={{ bgcolor: 'hsl(var(--primary))', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: 'hsl(var(--primary-hover))' } }}
-              >
-                Abrir PDF
-              </Button>
-            </Box>
-          ) : (
-            <Box
-              component="iframe"
-              src={`${pdfPreview.url}#view=FitH`}
-              title="Prévia do relatório"
-              sx={{ flex: 1, border: 'none' }}
-            />
-          ))}
-        </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.5 }}>
-          <Button onClick={closePdfPreview} sx={{ color: 'hsl(var(--text-secondary))', textTransform: 'none' }}>
-            Fechar
-          </Button>
-          <Button
-            variant="contained"
-            component="a"
-            href={pdfPreview?.url}
-            download={pdfPreview?.fileName}
-            startIcon={<FileDown size={16} />}
-            sx={{ bgcolor: 'hsl(var(--primary))', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: 'hsl(var(--primary-hover))' } }}
-          >
-            Baixar PDF
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Portal>
-        <Backdrop
-          open={exporting}
-          sx={{
-            zIndex: 1600,
-            position: 'fixed',
-            inset: 0,
-            backdropFilter: 'blur(6px)',
-            bgcolor: 'rgba(10, 12, 20, 0.5)',
-            flexDirection: 'column',
-            gap: 2.5,
-          }}
-        >
-          <CircularProgress size={46} sx={{ color: 'hsl(var(--accent))' }} />
-          <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>
-            Gerando relatório…
-          </Typography>
-          <Button
-            size="small"
-            onClick={handleCancelExport}
-            sx={{ color: 'rgba(255,255,255,0.75)', textTransform: 'none', borderRadius: 2 }}
-          >
-            Cancelar
-          </Button>
-        </Backdrop>
-      </Portal>
     </Box>
   )
 }

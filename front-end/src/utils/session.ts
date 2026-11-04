@@ -7,7 +7,9 @@ export function getSession(): LoginSession | null {
     const raw = localStorage.getItem(SESSION_KEY)
     if (!raw) return null
     const session = JSON.parse(raw) as LoginSession
-    if (session.expiration_time * 1000 < Date.now()) {
+    if (session.expiration_time * 1000 < Date.now() || !('root' in session)) {
+      /* sem 'root' = sessão de antes da flag — descarta para forçar re-login
+         e regravar com root correto (senão admin ficaria sem o dashboard) */
       localStorage.removeItem(SESSION_KEY)
       return null
     }

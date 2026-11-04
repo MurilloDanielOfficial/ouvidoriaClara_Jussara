@@ -66,6 +66,8 @@ export interface RelatorioData {
   funil: { atendidos: number; abriram: number; aguardando: number; resolvidas: number }
   statusRows: RelatorioLinha[]
   categoriaRows: RelatorioLinha[]
+  regiaoRows: { label: string; value: number }[]
+  cidadeRows: { label: string; value: number }[]
   statusFootnote: string | null
   categoriaFootnote: string | null
   alertas: RelatorioAlerta[]
@@ -92,22 +94,28 @@ const fmtDiaMes = (d: Date): string =>
 // registradas sem passar pela Ju — então só o chat conta aqui. Inativados
 // continuam contando: foram atendidos pela IA antes de serem inativados.
 // Filtra pelo criadoEm da última mensagem (mesmo critério do ListConversas).
+// Filtra por dia civil impresso no timestamp ('YYYY-MM-DD'), a mesma regra do
+// diaUTC no painel — evita divergir quando a data vem como 'Z', offset ou naive.
+function diaDe(s?: string | null): string | null {
+  return s?.trim().match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? null
+}
+
+function dentroDaJanela(dia: string | null, inicio?: string, fim?: string): boolean {
+  if (!dia) return false
+  if (inicio && dia < inicio) return false
+  if (fim && dia > fim) return false
+  return true
+}
+
 export function computeChatPhones(
   conversas: ConversaResumo[],
   inicio?: string,
   fim?: string,
 ): Set<string> {
   const phones = new Set<string>()
-  const filtroInicio = inicio ? new Date(`${inicio}T00:00:00`) : null
-  const filtroFim = fim ? new Date(`${fim}T23:59:59`) : null
   for (const c of conversas) {
     if (!c.telefone) continue
-    if (filtroInicio || filtroFim) {
-      const d = toUTCDate(c.criadoEm)
-      if (isNaN(d.getTime())) continue
-      if (filtroInicio && d < filtroInicio) continue
-      if (filtroFim && d > filtroFim) continue
-    }
+    if ((inicio || fim) && !dentroDaJanela(diaDe(c.criadoEm), inicio, fim)) continue
     phones.add(c.telefone)
   }
   return phones
@@ -120,6 +128,7 @@ export function computeRelatorioData(
   inicio?: string,
   fim?: string,
   now: Date = new Date(),
+  cidadesAtual?: Map<string, number>,
 ): RelatorioData {
   const total = ocorrencias.length
 
@@ -131,6 +140,8 @@ export function computeRelatorioData(
   const aprovPorTipo: Record<string, number> = { requerimento: 0, indicacao: 0, 'causa animal': 0, outros: 0 }
 
   const catMap: Record<string, number> = {}
+  const regMap: Record<string, number> = {}
+  let causaAnimal = 0
   const telefones = new Set<string>()
   let minData: Date | null = null
   let maxData: Date | null = null
@@ -148,6 +159,11 @@ export function computeRelatorioData(
     const cat = formatCategoryName(o.categoria || 'Sem Categoria')
     catMap[cat] = (catMap[cat] || 0) + 1
 
+    // Mesma regra do painel: sem região no detalhe → "Outros"
+    const reg = (o.detalhes?.regiao || '').trim() || 'Outros'
+    regMap[reg] = (regMap[reg] || 0) + 1
+    if (tp === 'causa animal') causaAnimal++
+
     if (o.telefone) telefones.add(o.telefone)
 
     const d = toUTCDate(o.dataCriacao)
@@ -163,8 +179,6 @@ export function computeRelatorioData(
   const pctParadas = pct(semTratativa, total)
   const taxaResolucao = pct(resolvidas, total)
 
-  const filtroInicio = inicio ? new Date(`${inicio}T00:00:00`) : null
-  const filtroFim = fim ? new Date(`${fim}T23:59:59`) : null
   const chatPhones = computeChatPhones(conversas, inicio, fim)
   const pessoasAtendidas = chatPhones.size
   const viraram = [...telefones].filter((t) => chatPhones.has(t)).length
@@ -172,14 +186,8 @@ export function computeRelatorioData(
 
   // Contatos respeitam o mesmo recorte: cadastrados dentro do período.
   // Sem filtro de data → todos.
-  const contatosFiltrados = (filtroInicio || filtroFim)
-    ? contatos.filter((c) => {
-        const d = toUTCDate(c.dataCriacao)
-        if (isNaN(d.getTime())) return false
-        if (filtroInicio && d < filtroInicio) return false
-        if (filtroFim && d > filtroFim) return false
-        return true
-      })
+  const contatosFiltrados = (inicio || fim)
+    ? contatos.filter((c) => dentroDaJanela(diaDe(c.dataCriacao), inicio, fim))
     : contatos
 
   const statusRows: RelatorioLinha[] = [
@@ -205,6 +213,18 @@ export function computeRelatorioData(
   if (demais > 0) {
     categoriaRows.push({ label: 'Demais categorias', value: demais, pct: pct(demais, total), color: GRAY })
   }
+
+  // Geografia: região vem dos detalhes da própria ocorrência (mesma fonte da
+  // seção "Solicitações por região" do painel); cidade vem do mapa já
+  // agregado que a página carrega de /ocorrencias/cidades.
+  const regiaoRows = Object.entries(regMap)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 7)
+    .map(([label, value]) => ({ label, value }))
+  const cidadeRows = [...(cidadesAtual?.entries() ?? [])]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 7)
+    .map(([label, value]) => ({ label, value }))
 
   const excluirLideres = new Set(['Outros', 'Demais categorias', 'Sem Categoria', 'Geral'])
   const lideres = topCats.map(([l]) => l).filter((l) => !excluirLideres.has(l)).slice(0, 2)
@@ -245,6 +265,16 @@ export function computeRelatorioData(
       descricao: taxaResolucao === 0
         ? 'Nenhuma solicitação concluída até agora.'
         : `${resolvidas} de ${total} solicitações concluídas.`,
+    })
+  }
+  // Causa animal é a pauta dominante do gabinete (~3/4 do volume real):
+  // merece visibilidade própria, não só a linha de status no card.
+  if (causaAnimal > 0) {
+    alertas.push({
+      nivel: 'OBSERVAÇÃO',
+      numero: `${pct(causaAnimal, total)}%`,
+      titulo: 'das solicitações é causa animal',
+      descricao: `${causaAnimal} de ${total} solicitações do recorte são denúncias de causa animal.`,
     })
   }
   if (dddsFora.length > 0) {
@@ -340,6 +370,8 @@ export function computeRelatorioData(
     funil: { atendidos: pessoasAtendidas, abriram: total, aguardando: semTratativa, resolvidas },
     statusRows,
     categoriaRows,
+    regiaoRows,
+    cidadeRows,
     statusFootnote,
     categoriaFootnote,
     alertas: alertas.slice(0, 3),
@@ -627,8 +659,34 @@ function pagina2(doc: jsPDF, d: RelatorioData, logoDataUrl?: string) {
   drawListaCard(14, `Status das ${d.totalSolicitacoes} solicitações`, d.statusRows, d.statusFootnote, hCards)
   drawListaCard(108, 'Solicitações por categoria', d.categoriaRows, d.categoriaFootnote, hCards)
 
+  // ---- Geografia do período: região de Sorocaba + cidades ----
+  const hGeo = d.regiaoRows.length > 0 || d.cidadeRows.length > 0 ? 26 : 0
+  if (hGeo > 0) {
+    const gy = 26 + hCards + 6
+    doc.setFillColor(...WHITE)
+    doc.roundedRect(14, gy, 182, hGeo, 3, 3, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9.5)
+    doc.setTextColor(...NAVY)
+    doc.text('Geografia do período', 21, gy + 7)
+    const geoLinha = (label: string, rows: { label: string; value: number }[], ly: number) => {
+      if (rows.length === 0) return
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(7.5)
+      doc.setTextColor(...TXT)
+      doc.text(label, 21, ly)
+      const labelW = doc.getTextWidth(label)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(...TXT_MUTED)
+      const txt = rows.map((r) => `${r.label} ${r.value}`).join(' · ')
+      doc.text(doc.splitTextToSize(txt, 174 - labelW)[0], 21 + labelW, ly)
+    }
+    geoLinha('Região:', d.regiaoRows, gy + 14.5)
+    geoLinha('Cidade:', d.cidadeRows, gy + 21.5)
+  }
+
   // ---- Alertas ----
-  let y = 26 + hCards + 8
+  let y = 26 + hCards + 8 + hGeo
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(11.5)
   doc.setTextColor(...NAVY)
